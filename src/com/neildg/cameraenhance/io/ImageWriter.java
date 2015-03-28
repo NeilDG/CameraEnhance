@@ -154,4 +154,8 @@ public class ImageWriter implements NotificationListener {
 	public void onNotify(String notificationString, Parameters params) {
 		
 	}
+	
+	public String getFilePath() {
+		return this.proposedPath;
+	}
 }
