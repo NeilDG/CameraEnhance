@@ -30,7 +30,7 @@ public class CaptureCallback implements PictureCallback {
 		Parameters params = new Parameters();
 		params.putExtra(CAPTURED_IMAGE_DATA_KEY, data);
 		
-		ImageDataStorage.getInstance().setOriginalImageData(data);
+		ImageSequencesHolder.getInstance().setOriginalImageData(data);
 		NotificationCenter.getInstance().postNotification(Notifications.ON_CREATE_THUMBNAIL, params);
 		
 		//update camera source to refresh preview

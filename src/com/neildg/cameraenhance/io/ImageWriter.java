@@ -8,7 +8,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 
 import com.neildg.cameraenhance.camera.CameraManager;
-import com.neildg.cameraenhance.capture.ImageDataStorage;
+import com.neildg.cameraenhance.capture.ImageSequencesHolder;
 import com.neildg.cameraenhance.utils.notifications.NotificationCenter;
 import com.neildg.cameraenhance.utils.notifications.NotificationListener;
 import com.neildg.cameraenhance.utils.notifications.Notifications;
@@ -53,14 +53,12 @@ public class ImageWriter implements NotificationListener {
 	
 	public static void initialize(Context context) {
 		sharedInstance = new ImageWriter(context);
-		//NotificationCenter.getInstance().addObserver(Notifications.ON_POST_PROCESS_FINISHED, sharedInstance);
 		
 		//also initialize image reader
 		ImageReader.initialize(context);
 	}
 	
 	public static void destroy() {
-		//NotificationCenter.getInstance().removeObserver(Notifications.ON_POST_PROCESS_FINISHED, sharedInstance);
 		
 		//also destroy image reader
 		ImageReader.destroy();
@@ -88,7 +86,7 @@ public class ImageWriter implements NotificationListener {
 		
 		//save original image
 		try {
-			byte[] imageData = ImageDataStorage.getInstance().getOriginalImageData();
+			byte[] imageData = ImageSequencesHolder.getInstance().getOriginalImageData();
 			
 			if(imageData != null) {
 				File originalImageFile = new File(this.proposedPath, ORIGINAL_IMAGE_NAME);
@@ -109,8 +107,8 @@ public class ImageWriter implements NotificationListener {
 			Camera.Parameters parameters = CameraManager.getInstance().requestCamera().getParameters();
 			Size size = parameters.getPreviewSize(); 
 			
-			for(int i = 0; i < ImageDataStorage.getInstance().getImageToProcessSize(); i++) {
-				byte[] imageData = ImageDataStorage.getInstance().getImageDataAt(i);
+			for(int i = 0; i < ImageSequencesHolder.getInstance().getImageToProcessSize(); i++) {
+				byte[] imageData = ImageSequencesHolder.getInstance().getImageDataAt(i);
 				
 				if(imageData != null) {
 			       
@@ -134,7 +132,7 @@ public class ImageWriter implements NotificationListener {
 		//save processed image
 		try {
 		
-			byte[] imageData = ImageDataStorage.getInstance().getProcessedImageData();
+			byte[] imageData = ImageSequencesHolder.getInstance().getProcessedImageData();
 			
 			if(imageData != null) {
 				File processedImageFile = new File(this.proposedPath, PROCESSED_IMAGE_NAME);

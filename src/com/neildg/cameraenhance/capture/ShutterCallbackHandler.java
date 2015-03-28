@@ -47,7 +47,7 @@ public class ShutterCallbackHandler extends Thread implements PreviewCallback {
 			e1.printStackTrace();
 		}
 		
-		for(int i = 0; i < ImageDataStorage.MAX_IMAGE_TO_PROCESS; i++) {
+		for(int i = 0; i < ImageSequencesHolder.MAX_IMAGE_TO_PROCESS; i++) {
 			camera.setOneShotPreviewCallback(this);
 			
 			try {
@@ -59,7 +59,7 @@ public class ShutterCallbackHandler extends Thread implements PreviewCallback {
 		}
 		
 		ImageWriter.getInstance().startWriting(); //start writing images
-		ImageDataStorage.getInstance().release();
+		ImageSequencesHolder.getInstance().release();
 		
 		ProgressDialogHandler.getInstance().hideDialog();
 		CameraManager.getInstance().resetSettings();
@@ -67,7 +67,7 @@ public class ShutterCallbackHandler extends Thread implements PreviewCallback {
 	
 	@Override
 	public void onPreviewFrame(byte[] data, Camera camera) {
-		ImageDataStorage.getInstance().addImageDataToProcess(data);
+		ImageSequencesHolder.getInstance().addImageDataToProcess(data);
 		Log.d(TAG, "Saved image data");
 		
 		try {

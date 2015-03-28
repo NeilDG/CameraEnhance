@@ -9,17 +9,19 @@ import android.os.Debug;
 import android.util.Log;
 
 /**
- * Stores captured images here for easier retrieval.
+ * Image sequences from camera capture and the original image is stored here.
+ * Once the capture is done. Memory is released. You cannot use this class to retrieve
+ * sequences during the processing phase.
  * @author NeilDG
  *
  */
-public class ImageDataStorage {
+public class ImageSequencesHolder {
 	private final static String TAG = "CameraEnhance_ImageDataStorage";
 	
-	private static ImageDataStorage sharedInstance = null;
-	public static ImageDataStorage getInstance() {
+	private static ImageSequencesHolder sharedInstance = null;
+	public static ImageSequencesHolder getInstance() {
 		if(sharedInstance == null) {
-			sharedInstance = new ImageDataStorage();
+			sharedInstance = new ImageSequencesHolder();
 		}
 		
 		return sharedInstance;
@@ -31,7 +33,7 @@ public class ImageDataStorage {
 	private ArrayList<byte[]> imageDataGroup;
 	private byte[] processedImageData;
 	
-	private ImageDataStorage() {
+	private ImageSequencesHolder() {
 		this.imageDataGroup = new ArrayList<byte[]>();
 	}
 	
