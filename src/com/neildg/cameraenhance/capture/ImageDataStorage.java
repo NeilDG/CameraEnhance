@@ -5,6 +5,7 @@ package com.neildg.cameraenhance.capture;
 
 import java.util.ArrayList;
 
+import android.os.Debug;
 import android.util.Log;
 
 /**
@@ -43,7 +44,7 @@ public class ImageDataStorage {
 	}
 	
 	public void addImageDataToProcess(byte[] imageData) {
-		if(this.imageDataGroup.size() < MAX_IMAGE_TO_PROCESS) {
+		if(this.imageDataGroup.size() <= MAX_IMAGE_TO_PROCESS) {
 			this.imageDataGroup.add(imageData);
 		}
 		else {
@@ -65,5 +66,14 @@ public class ImageDataStorage {
 	
 	public byte[] getProcessedImageData() {
 		return this.processedImageData;
+	}
+	
+	/*
+	 * Releases allocation of byte data for reuse. It is best to call this upon writing to file as images are already saved.
+	 */
+	public void release() {
+		this.imageDataGroup.clear();
+		this.originalImageData = null;
+		this.processedImageData = null;
 	}
 }

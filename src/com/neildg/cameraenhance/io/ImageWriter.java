@@ -7,6 +7,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 
+import com.neildg.cameraenhance.camera.CameraManager;
 import com.neildg.cameraenhance.capture.ImageDataStorage;
 import com.neildg.cameraenhance.utils.notifications.NotificationCenter;
 import com.neildg.cameraenhance.utils.notifications.NotificationListener;
@@ -14,6 +15,10 @@ import com.neildg.cameraenhance.utils.notifications.Notifications;
 import com.neildg.cameraenhance.utils.notifications.Parameters;
 
 import android.content.Context;
+import android.graphics.Rect;
+import android.graphics.YuvImage;
+import android.hardware.Camera;
+import android.hardware.Camera.Size;
 import android.os.Environment;
 import android.util.Log;
 
@@ -48,14 +53,14 @@ public class ImageWriter implements NotificationListener {
 	
 	public static void initialize(Context context) {
 		sharedInstance = new ImageWriter(context);
-		NotificationCenter.getInstance().addObserver(Notifications.ON_POST_PROCESS_FINISHED, sharedInstance);
+		//NotificationCenter.getInstance().addObserver(Notifications.ON_POST_PROCESS_FINISHED, sharedInstance);
 		
 		//also initialize image reader
 		ImageReader.initialize(context);
 	}
 	
 	public static void destroy() {
-		NotificationCenter.getInstance().removeObserver(Notifications.ON_POST_PROCESS_FINISHED, sharedInstance);
+		//NotificationCenter.getInstance().removeObserver(Notifications.ON_POST_PROCESS_FINISHED, sharedInstance);
 		
 		//also destroy image reader
 		ImageReader.destroy();
@@ -83,12 +88,12 @@ public class ImageWriter implements NotificationListener {
 		
 		//save original image
 		try {
-			File originalImageFile = new File(this.proposedPath, ORIGINAL_IMAGE_NAME);
-			
-			FileOutputStream fos = new FileOutputStream(originalImageFile);
 			byte[] imageData = ImageDataStorage.getInstance().getOriginalImageData();
 			
 			if(imageData != null) {
+				File originalImageFile = new File(this.proposedPath, ORIGINAL_IMAGE_NAME);
+				FileOutputStream fos = new FileOutputStream(originalImageFile);
+				
 				fos.write(imageData);
 				fos.close();
 			}
@@ -98,14 +103,42 @@ public class ImageWriter implements NotificationListener {
 			Log.e(TAG, "Error writing original image: " +e.getMessage());
 		}
 		
+		//save image sequences
+		try {
+
+			Camera.Parameters parameters = CameraManager.getInstance().requestCamera().getParameters();
+			Size size = parameters.getPreviewSize(); 
+			
+			for(int i = 0; i < ImageDataStorage.getInstance().getImageToProcessSize(); i++) {
+				byte[] imageData = ImageDataStorage.getInstance().getImageDataAt(i);
+				
+				if(imageData != null) {
+			       
+			        YuvImage image = new YuvImage(imageData, parameters.getPreviewFormat(), 
+			                size.width, size.height, null); 
+					File originalImageFile = new File(this.proposedPath, (i + 1) + ".jpg");
+					FileOutputStream fos = new FileOutputStream(originalImageFile);
+					
+					image.compressToJpeg( 
+			                new Rect(0, 0, image.getWidth(), image.getHeight()), 90, 
+			                fos); 
+					fos.close();
+				}
+			}
+			
+		}
+		catch(IOException e) {
+			Log.e(TAG, "Error writing original image: " +e.getMessage());
+		}
+		
 		//save processed image
 		try {
-			File processedImageFile = new File(this.proposedPath, PROCESSED_IMAGE_NAME);
-			
-			FileOutputStream fos = new FileOutputStream(processedImageFile);
+		
 			byte[] imageData = ImageDataStorage.getInstance().getProcessedImageData();
 			
 			if(imageData != null) {
+				File processedImageFile = new File(this.proposedPath, PROCESSED_IMAGE_NAME);
+				FileOutputStream fos = new FileOutputStream(processedImageFile);
 				fos.write(imageData);
 				fos.close();
 			}
@@ -119,8 +152,6 @@ public class ImageWriter implements NotificationListener {
 
 	@Override
 	public void onNotify(String notificationString, Parameters params) {
-		if(notificationString == Notifications.ON_POST_PROCESS_FINISHED) {
-			this.startWriting();
-		}
+		
 	}
 }
