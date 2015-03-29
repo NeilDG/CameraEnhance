@@ -36,7 +36,7 @@ public class CaptureCallback implements PictureCallback {
 		//update camera source to refresh preview
 		CameraManager.getInstance().refreshCameraPreview();
 		
-		ShutterCallbackHandler shutterHandler = new ShutterCallbackHandler(400);
+		ShutterCallbackHandler shutterHandler = new ShutterCallbackHandler();
 		shutterHandler.start();
 		//NotificationCenter.getInstance().postNotification(Notifications.ON_IMAGE_PROCESSING_STARTED);
 	}

@@ -61,6 +61,7 @@ public class ImageReader {
 				
 				byte[] readBytes = new byte[(int) file.length()];
 				inputStream.read(readBytes);
+				inputStream.close();
 				
 				return readBytes;
 			}

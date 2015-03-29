@@ -6,6 +6,8 @@ package com.neildg.cameraenhance.capture;
 import java.util.concurrent.Semaphore;
 
 import com.neildg.cameraenhance.camera.CameraManager;
+import com.neildg.cameraenhance.config.ConfigHandler;
+import com.neildg.cameraenhance.config.values.BaseConfig;
 import com.neildg.cameraenhance.io.ImageWriter;
 import com.neildg.cameraenhance.ui.ProgressDialogHandler;
 
@@ -21,17 +23,12 @@ import android.util.Log;
 public class ShutterCallbackHandler extends Thread implements PreviewCallback {
 	private final static String TAG = "CameraEnhance_ShutterCallback";
 	
-	private long delayPerFrame = 0;
-	
 	private Semaphore waitSem;
+	private BaseConfig currentConfig;
 	
-	public ShutterCallbackHandler(long delay) {
-		this.delayPerFrame = delay;
+	public ShutterCallbackHandler() {
 		this.waitSem = new Semaphore(0);
-	}
-	
-	public float getDelayPerFrame() {
-		return this.delayPerFrame;
+		this.currentConfig = ConfigHandler.getInstance().getCurrentConfig();
 	}
 	
 	@Override
@@ -47,7 +44,7 @@ public class ShutterCallbackHandler extends Thread implements PreviewCallback {
 			e1.printStackTrace();
 		}
 		
-		for(int i = 0; i < ImageSequencesHolder.MAX_IMAGE_TO_PROCESS; i++) {
+		for(int i = 0; i < this.currentConfig.getImageLimit(); i++) {
 			camera.setOneShotPreviewCallback(this);
 			
 			try {
@@ -71,7 +68,7 @@ public class ShutterCallbackHandler extends Thread implements PreviewCallback {
 		Log.d(TAG, "Saved image data");
 		
 		try {
-			Thread.sleep(this.delayPerFrame);
+			Thread.sleep(this.currentConfig.getShutterDelay());
 		} catch (InterruptedException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

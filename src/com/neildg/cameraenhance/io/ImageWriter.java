@@ -49,13 +49,14 @@ public class ImageWriter implements NotificationListener {
 	
 	private ImageWriter(Context context) {
 		this.context = context;
+		
+		//also initialize image reader
+		ImageReader.initialize(context);
+		this.identifyDir();
 	}
 	
 	public static void initialize(Context context) {
 		sharedInstance = new ImageWriter(context);
-		
-		//also initialize image reader
-		ImageReader.initialize(context);
 	}
 	
 	public static void destroy() {
@@ -64,7 +65,7 @@ public class ImageWriter implements NotificationListener {
 		ImageReader.destroy();
 	}
 	
-	private void createNewAlbum() {
+	private void identifyDir() {
 		//identify directory index first
 		while(ImageReader.getInstance().isAlbumDirExisting(this.startingAlbum)) {
 			this.startingAlbum++;
@@ -72,6 +73,10 @@ public class ImageWriter implements NotificationListener {
 		
 		//create path
 		this.proposedPath = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES) + ALBUM_NAME_PREFIX + this.startingAlbum;
+	}
+	
+	private void createNewAlbum() {
+		
 		File filePath = new File(this.proposedPath);
 		filePath.mkdirs();
 		
@@ -114,7 +119,7 @@ public class ImageWriter implements NotificationListener {
 			       
 			        YuvImage image = new YuvImage(imageData, parameters.getPreviewFormat(), 
 			                size.width, size.height, null); 
-					File originalImageFile = new File(this.proposedPath, (i + 1) + ".jpg");
+					File originalImageFile = new File(this.proposedPath, (i) + ".jpg");
 					FileOutputStream fos = new FileOutputStream(originalImageFile);
 					
 					image.compressToJpeg( 
@@ -129,11 +134,12 @@ public class ImageWriter implements NotificationListener {
 			Log.e(TAG, "Error writing original image: " +e.getMessage());
 		}
 		
+		this.identifyDir(); //identify new dir for new images
+	}
+	
+	public void saveProcessedImage(byte[] imageData) {
 		//save processed image
 		try {
-		
-			byte[] imageData = ImageSequencesHolder.getInstance().getProcessedImageData();
-			
 			if(imageData != null) {
 				File processedImageFile = new File(this.proposedPath, PROCESSED_IMAGE_NAME);
 				FileOutputStream fos = new FileOutputStream(processedImageFile);
@@ -145,7 +151,6 @@ public class ImageWriter implements NotificationListener {
 		catch(IOException e) {
 			Log.e(TAG, "Error writing original image: " +e.getMessage());
 		}
-		
 	}
 
 	@Override
