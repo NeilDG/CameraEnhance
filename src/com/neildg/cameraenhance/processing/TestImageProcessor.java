@@ -13,6 +13,7 @@ import org.opencv.imgproc.Imgproc;
 import android.graphics.Bitmap;
 
 import com.neildg.cameraenhance.capture.ImageSequencesHolder;
+import com.neildg.cameraenhance.images.ImageDataStorage;
 import com.neildg.cameraenhance.thumbnail.BitmapDecoder;
 import com.neildg.cameraenhance.ui.ProgressDialogHandler;
 
@@ -54,7 +55,7 @@ public class TestImageProcessor implements IImageProcessor {
 		// encoding to png, so that your image does not lose information like with jpeg.
         Highgui.imencode(".png",this.resizedMatrix, matOfByte); 
         
-		ImageSequencesHolder.getInstance().setProcessedImageData(matOfByte.toArray());
+		ImageDataStorage.getInstance().setProcessImageData(matOfByte.toArray());
 		
 		this.matrixImage.release();
 		this.resizedMatrix.release();

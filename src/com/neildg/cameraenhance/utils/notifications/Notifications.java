@@ -22,4 +22,5 @@ public class Notifications {
 	public final static String ON_POST_PROCESS_FINISHED = "ON_POST_PROCESS_FINISHED";
 	
 	public final static String ON_IMAGE_PROCESSING_STARTED = "ON_IMAGE_PROCESSING_STARTED";
+	public final static String ON_IMAGE_PROCESSING_FINISHED = "ON_IMAGE_PROCESSING_FINISHED";
 }

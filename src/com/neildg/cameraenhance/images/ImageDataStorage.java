@@ -1,13 +1,12 @@
 /**
  * 
  */
-package com.neildg.cameraenhance.processing;
+package com.neildg.cameraenhance.images;
 
 import java.util.Hashtable;
 
 import android.util.Log;
 
-import com.neildg.cameraenhance.capture.ImageSequencesHolder;
 import com.neildg.cameraenhance.config.ConfigHandler;
 import com.neildg.cameraenhance.config.values.BaseConfig;
 import com.neildg.cameraenhance.io.ImageReader;
@@ -24,7 +23,7 @@ public class ImageDataStorage {
 	private final static String TAG = "CameraEnhance_ImageDataStorage";
 	
 	private static ImageDataStorage sharedInstance = null;
-	public static ImageDataStorage getSharedInstance() {
+	public static ImageDataStorage getInstance() {
 		if(sharedInstance == null) {
 			sharedInstance = new ImageDataStorage();
 		}
@@ -42,7 +41,7 @@ public class ImageDataStorage {
 		this.currentConfig = ConfigHandler.getInstance().getCurrentConfig();
 	}
 	
-	/*
+	/**
 	 * Loads the original image found in the album.
 	 */
 	public byte[] loadOriginalImage() {
@@ -53,7 +52,7 @@ public class ImageDataStorage {
 		return this.originalImageData;
 	}
 	
-	/*
+	/**
 	 * Releases the original image. Call this when it is no longer needed
 	 */
 	public void releaseOriginalImage() {
@@ -61,9 +60,9 @@ public class ImageDataStorage {
 		System.gc();
 	}
 	
-	/*
+	/**
 	 * Loads a specified image sequence.
-	 * Min = 1, Max = depends on setting
+	 * Min = 0, Max = depends on setting
 	 */
 	public byte[] loadImageSequence(int sequenceNum) {
 		String fileName = sequenceNum + ".jpg";
@@ -72,12 +71,15 @@ public class ImageDataStorage {
 			this.imageDataGroup = new Hashtable<Integer, byte[]>();
 		}
 		
-		if(sequenceNum <= this.currentConfig.getImageLimit()) {
+		if(sequenceNum < this.currentConfig.getImageLimit()) {
 			
 			byte[] imageData = this.imageDataGroup.get(sequenceNum);
 			if(imageData == null) {
 				imageData = ImageReader.getInstance().getBytesFromFile(fileName);
-				this.imageDataGroup.put(sequenceNum, imageData);
+				
+				if(imageData != null) {
+					this.imageDataGroup.put(sequenceNum, imageData);
+				}
 			}
 			
 			return imageData;
@@ -88,10 +90,14 @@ public class ImageDataStorage {
 		}
 	}
 	
-	/*
+	/**
 	 * Releases the specified image sequence. Call this when the image frame is no longer needed
 	 */
 	public void releaseImageSequence(int sequenceNum) {
+		if(this.imageDataGroup == null) {
+			return;
+		}
+		
 		if(this.imageDataGroup.containsKey(sequenceNum)) {
 			this.imageDataGroup.remove(sequenceNum);
 		}
@@ -101,5 +107,67 @@ public class ImageDataStorage {
 		}
 		
 		System.gc();
+	}
+	
+	public void releaseAllImageSequences() {
+		BaseConfig currentConfig = ConfigHandler.getInstance().getCurrentConfig();
+		for(int i = 0; i < currentConfig.getImageLimit(); i++) {
+			this.releaseImageSequence(i);
+		}
+	}
+	
+	/**
+	 * Sets the processed image data and stored in runtime. This does not write it into file yet.
+	 * Call storeProcessImageData to do so.
+	 */
+	public void setProcessImageData(byte[] processedImage) {
+		this.processedImageData = processedImage;
+	}
+	
+	/**
+	 * Stores the processed image data into file and releases runtime memory.
+	 */
+	public void storeProcessImageData() {
+		if(this.processedImageData != null) {
+			ImageWriter.getInstance().saveProcessedImage(this.processedImageData);
+			this.processedImageData = null;
+			System.gc();
+		}
+		else {
+			Log.e(TAG, "Processed image data does not exist!");
+		}
+	}
+	
+	/**
+	 * Returns the processed image data. If it is null, it attempts to load it from file.
+	 */
+	public byte[] loadProcessedImageData() {
+		if(this.processedImageData == null) {
+			this.processedImageData = ImageReader.getInstance().getBytesFromFile(ImageWriter.PROCESSED_IMAGE_NAME);
+			
+			//if it's still null, then file is not existing yet
+			if(this.processedImageData == null) {
+				Log.e(TAG, "Processed image is not found in file!");
+			}
+		}
+		
+		return this.processedImageData;
+	}
+	
+	public void releaseProcessedImageData() {
+		this.processedImageData = null;
+		System.gc();
+	}
+	
+	/**
+	 * Attempts to release all resources
+	 */
+	public void releaseAll() {
+		this.releaseOriginalImage();
+		this.releaseProcessedImageData();
+		
+		for(int i = 0; i < ConfigHandler.getInstance().getCurrentConfig().getImageLimit(); i++) {
+			this.releaseImageSequence(i);
+		}
 	}
 }

@@ -32,7 +32,6 @@ public class ImageSequencesHolder {
 	
 	private byte[] originalImageData;
 	private ArrayList<byte[]> imageDataGroup;
-	private byte[] processedImageData;
 	
 	private BaseConfig currentConfig;
 	
@@ -66,20 +65,11 @@ public class ImageSequencesHolder {
 		return this.imageDataGroup.size();
 	}
 	
-	public void setProcessedImageData(byte[] imageData) {
-		this.processedImageData = imageData;
-	}
-	
-	public byte[] getProcessedImageData() {
-		return this.processedImageData;
-	}
-	
-	/*
+	/**
 	 * Releases allocation of byte data for reuse. It is best to call this upon writing to file as images are already saved.
 	 */
 	public void release() {
 		this.imageDataGroup.clear();
 		this.originalImageData = null;
-		this.processedImageData = null;
 	}
 }

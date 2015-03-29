@@ -21,18 +21,24 @@ public class ProcessorDispatcher implements NotificationListener {
 	
 	private static ProcessorDispatcher sharedInstance = null;
 	public static ProcessorDispatcher getInstance() {
-		/*if(sharedInstance == null) {
-			sharedInstance = new ProcessorDispatcher();
-		}*/
-		Log.e(TAG, "Processor dispatcher is not yet initialized!");
+		if(sharedInstance == null) {
+			//sharedInstance = new ProcessorDispatcher();
+			Log.e(TAG, "Processor dispatcher is not yet initialized!");
+		}
 		return sharedInstance;
 	}
 	
 	private IImageProcessor imageProcessingTask;
 	private ImageWorker imageWorker;
 	
+	private boolean processingOnGoing = false;
+	
 	private ProcessorDispatcher() {
 		NotificationCenter.getInstance().addObserver(Notifications.ON_IMAGE_PROCESSING_STARTED, this);
+		NotificationCenter.getInstance().addObserver(Notifications.ON_IMAGE_PROCESSING_FINISHED, this);
+		
+		//IMPORTANT: define image processing task here.
+	    this.attachImageProcessor(new TestImageProcessor());
 	}
 	
 	public static void initialize() {
@@ -54,20 +60,31 @@ public class ProcessorDispatcher implements NotificationListener {
 	}
 	
 	private void startProcessing() {
-		if(this.imageProcessingTask != null) {
+		if(this.imageProcessingTask != null && this.processingOnGoing == false) {
+			this.processingOnGoing = true;
 			this.imageWorker = new ImageWorker();
 			this.imageWorker.attachImageProcessor(this.imageProcessingTask);
 			this.imageWorker.start();
+		}
+		else if(this.processingOnGoing == true) {
+			Log.e(TAG, "Cannot start image processing. An image processing task is already being executed!");
 		}
 		else {
 			Log.e(TAG, "Cannot start image processing. There is no attached image processing task!");
 		}
 	}
 	
+	private void stopProcessing() {
+		this.processingOnGoing = false;
+	}
+	
 	@Override
 	public void onNotify(String notificationString, Parameters params) {
 		if(notificationString == Notifications.ON_IMAGE_PROCESSING_STARTED) {
 			this.startProcessing();
+		}
+		else if(notificationString == Notifications.ON_IMAGE_PROCESSING_FINISHED) {
+			this.stopProcessing();
 		}
 	}
 	

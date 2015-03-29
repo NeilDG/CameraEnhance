@@ -27,6 +27,7 @@ import com.neildg.cameraenhance.processing.TestImageProcessor;
 import com.neildg.cameraenhance.thumbnail.ThumbnailView;
 import com.neildg.cameraenhance.ui.DialogImageChooser;
 import com.neildg.cameraenhance.ui.ProgressDialogHandler;
+import com.neildg.cameraenhance.unittests.TestExecutioner;
 import com.neildg.cameraenhance.utils.ApplicationCore;
 
 
@@ -111,9 +112,6 @@ public class MainActivity extends Activity implements DialogImageChooser.NoticeD
 	    ProcessorDispatcher.initialize();
 	    ImageWriter.initialize(this);
 	    
-	    //IMPORTANT: define image processing task here.
-	    ProcessorDispatcher.getInstance().attachImageProcessor(new TestImageProcessor());
-	    
 	    Camera deviceCamera = CameraManager.getInstance().requestCamera();
 		this.cameraPreview = (CameraPreview) this.findViewById(R.id.camera_surface_view);
 		this.cameraPreview.assignCamera(deviceCamera);
@@ -132,7 +130,18 @@ public class MainActivity extends Activity implements DialogImageChooser.NoticeD
 				imageChooser.show(MainActivity.this.getFragmentManager(), "Image Chooser");
 			}
 		});
+		
+		ImageButton optionsBtn = (ImageButton) this.findViewById(R.id.btn_options);
+		optionsBtn.setOnClickListener(new OnClickListener() {
+			
+			@Override
+			public void onClick(View v) {
+				TestExecutioner.getInstance().startMemoryTest();
+			}
+		});
 	    
+		//for unit testing
+		TestExecutioner.getInstance().startTestSeries();
 	}
 	
 	@Override

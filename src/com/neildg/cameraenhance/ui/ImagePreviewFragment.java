@@ -71,20 +71,6 @@ public class ImagePreviewFragment extends Fragment {
 		imageWorker.start();
 	}
 	
-	private void displayProcessedImage() {
-		
-		this.getActivity().runOnUiThread(new Runnable() {
-			
-			@Override
-			public void run() {
-				Bitmap bitmap = BitmapDecoder.decodeActualBitmapFromByteArray(ImageSequencesHolder.getInstance().getProcessedImageData());
-				
-				ImagePreviewFragment.this.imageView.setImageBitmap(bitmap);
-				ImagePreviewFragment.this.photoAttacher.update();
-			}
-		});
-
-	}
 	
 	private void showProgressDialog(final String title, final String message) {
 		this.getActivity().runOnUiThread(new Runnable() {
