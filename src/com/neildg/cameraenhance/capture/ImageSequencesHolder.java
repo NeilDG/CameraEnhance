@@ -5,6 +5,9 @@ package com.neildg.cameraenhance.capture;
 
 import java.util.ArrayList;
 
+import com.neildg.cameraenhance.config.ConfigHandler;
+import com.neildg.cameraenhance.config.values.BaseConfig;
+
 import android.os.Debug;
 import android.util.Log;
 
@@ -27,14 +30,15 @@ public class ImageSequencesHolder {
 		return sharedInstance;
 	}
 	
-	public final static int MAX_IMAGE_TO_PROCESS = 10;
-	
 	private byte[] originalImageData;
 	private ArrayList<byte[]> imageDataGroup;
 	private byte[] processedImageData;
 	
+	private BaseConfig currentConfig;
+	
 	private ImageSequencesHolder() {
 		this.imageDataGroup = new ArrayList<byte[]>();
+		this.currentConfig = ConfigHandler.getInstance().getCurrentConfig();
 	}
 	
 	public void setOriginalImageData(byte[] imageData) {
@@ -46,7 +50,7 @@ public class ImageSequencesHolder {
 	}
 	
 	public void addImageDataToProcess(byte[] imageData) {
-		if(this.imageDataGroup.size() <= MAX_IMAGE_TO_PROCESS) {
+		if(this.imageDataGroup.size() <= this.currentConfig.getImageLimit()) {
 			this.imageDataGroup.add(imageData);
 		}
 		else {

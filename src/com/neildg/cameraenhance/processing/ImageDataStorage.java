@@ -3,12 +3,13 @@
  */
 package com.neildg.cameraenhance.processing;
 
-import java.util.ArrayList;
 import java.util.Hashtable;
 
 import android.util.Log;
 
 import com.neildg.cameraenhance.capture.ImageSequencesHolder;
+import com.neildg.cameraenhance.config.ConfigHandler;
+import com.neildg.cameraenhance.config.values.BaseConfig;
 import com.neildg.cameraenhance.io.ImageReader;
 import com.neildg.cameraenhance.io.ImageWriter;
 
@@ -35,8 +36,10 @@ public class ImageDataStorage {
 	private Hashtable<Integer, byte[]> imageDataGroup;
 	private byte[] processedImageData;
 	
+	private BaseConfig currentConfig;
+	
 	private ImageDataStorage() {
-		
+		this.currentConfig = ConfigHandler.getInstance().getCurrentConfig();
 	}
 	
 	/*
@@ -69,7 +72,7 @@ public class ImageDataStorage {
 			this.imageDataGroup = new Hashtable<Integer, byte[]>();
 		}
 		
-		if(sequenceNum <= ImageSequencesHolder.MAX_IMAGE_TO_PROCESS) {
+		if(sequenceNum <= this.currentConfig.getImageLimit()) {
 			
 			byte[] imageData = this.imageDataGroup.get(sequenceNum);
 			if(imageData == null) {
