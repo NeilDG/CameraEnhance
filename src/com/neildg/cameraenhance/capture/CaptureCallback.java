@@ -38,7 +38,6 @@ public class CaptureCallback implements PictureCallback {
 		
 		ShutterCallbackHandler shutterHandler = new ShutterCallbackHandler();
 		shutterHandler.start();
-		//NotificationCenter.getInstance().postNotification(Notifications.ON_IMAGE_PROCESSING_STARTED);
 	}
 	
 	

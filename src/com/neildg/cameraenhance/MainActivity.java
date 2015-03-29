@@ -141,7 +141,7 @@ public class MainActivity extends Activity implements DialogImageChooser.NoticeD
 		});
 	    
 		//for unit testing
-		TestExecutioner.getInstance().startTestSeries();
+		//TestExecutioner.getInstance().startTestSeries();
 	}
 	
 	@Override
@@ -150,13 +150,13 @@ public class MainActivity extends Activity implements DialogImageChooser.NoticeD
 		CameraManager.getInstance().closeCamera();
 		ProgressDialogHandler.destroy();
 		ProcessorDispatcher.destroy();
-		ImageWriter.destroy();
+		
 	}
 	
 	@Override
 	public void onDestroy() {
 		super.onDestroy();
-
+		ImageWriter.destroy();
 	}
 
 	@Override

@@ -3,6 +3,7 @@ package com.neildg.cameraenhance.thumbnail;
 
 import android.content.res.Resources;
 import android.graphics.Bitmap;
+import android.graphics.Bitmap.Config;
 import android.graphics.BitmapFactory;
 
 /**
@@ -76,6 +77,7 @@ public class BitmapDecoder {
 		 options.inJustDecodeBounds = false;
 		 options.inMutable = true;
 		 options.inPurgeable = true;
+		 options.inPreferredConfig = Config.ARGB_8888;
 		 
 		 return BitmapFactory.decodeByteArray(byteArray, 0, byteArray.length, options);
 	}

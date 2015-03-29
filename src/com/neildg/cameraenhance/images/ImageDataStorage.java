@@ -5,6 +5,8 @@ package com.neildg.cameraenhance.images;
 
 import java.util.Hashtable;
 
+import org.opencv.core.Mat;
+
 import android.util.Log;
 
 import com.neildg.cameraenhance.config.ConfigHandler;
@@ -34,6 +36,8 @@ public class ImageDataStorage {
 	private byte[] originalImageData;
 	private Hashtable<Integer, byte[]> imageDataGroup;
 	private byte[] processedImageData;
+	
+	private Mat originalImageMat;
 	
 	private BaseConfig currentConfig;
 	
@@ -168,6 +172,27 @@ public class ImageDataStorage {
 		
 		for(int i = 0; i < ConfigHandler.getInstance().getCurrentConfig().getImageLimit(); i++) {
 			this.releaseImageSequence(i);
+		}
+	}
+	
+	/**
+	 * Returns the mat form of the original image
+	 */
+	public Mat loadMatFormOfOriginalImage() {
+		if(this.originalImageMat == null) {
+			this.originalImageMat = ImageReader.getInstance().imReadOpenCV(ImageWriter.ORIGINAL_IMAGE_NAME);
+		}
+		Log.d(TAG, "Original Image mat: " +this.originalImageMat.depth());
+		return this.originalImageMat;
+	}
+	
+	/**
+	 * Releases the mat form of original image. Frees up the memory if needed.
+	 */
+	public void releaseMatOfOriginalImage() {
+		if(this.originalImageMat == null) {
+			this.originalImageMat.release();
+			this.originalImageMat = null;
 		}
 	}
 }

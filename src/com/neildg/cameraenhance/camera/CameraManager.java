@@ -32,7 +32,9 @@ public class CameraManager {
 	
 	private Camera deviceCamera;
 	private CameraPreview cameraPreview;
+	
 	private Size defaultPreviewSize;
+	private Size shutterSize;
 	
 	private boolean isFrontCamera = false;
 	private boolean safeToTakePicture = false;
@@ -170,11 +172,19 @@ public class CameraManager {
 		 int largestHeight = pictureSize.height;
 		 
 		 Camera.Size bestPictureSize = this.getBestPictureSize(largestWidth, largestHeight);
-				 
+		 this.shutterSize = bestPictureSize;
+		 
 		 parameters.setPreviewSize(bestPictureSize.width, bestPictureSize.height);
 		 this.deviceCamera.setParameters(parameters);
-		 
 		 this.deviceCamera.startPreview();
+	}
+	
+	public Camera.Size getShutterSize() {
+		return this.shutterSize;
+	}
+	
+	public Camera.Size getActualCameraSize() {
+		return this.deviceCamera.getParameters().getPictureSize();
 	}
 	
 	private Camera.Size getBestPictureSize(int width, int height)
