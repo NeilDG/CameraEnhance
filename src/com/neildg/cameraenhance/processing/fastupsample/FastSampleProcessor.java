@@ -7,6 +7,7 @@ import android.util.Log;
 import com.neildg.cameraenhance.processing.IImageProcessor;
 import com.neildg.cameraenhance.processing.fastupsample.operators.GaussianBlur;
 import com.neildg.cameraenhance.processing.fastupsample.operators.InitialUpSampler;
+import com.neildg.cameraenhance.processing.fastupsample.operators.UnsharpenMask;
 import com.neildg.cameraenhance.processing.fastupsample.saving.ImageSaver;
 import com.neildg.cameraenhance.ui.ProgressDialogHandler;
 
@@ -21,11 +22,13 @@ public class FastSampleProcessor implements IImageProcessor {
 	
 	private InitialUpSampler upSampler;
 	private GaussianBlur blurOperator;
+	private UnsharpenMask unsharpMask;
 	
 	private ImageSaver imageSaver;
 	
 	private Mat upSampledMatrix;
 	private Mat blurOutputMatrix;
+	private Mat sharpenedMatrix;
 	
 	
 	public FastSampleProcessor() {
@@ -37,21 +40,31 @@ public class FastSampleProcessor implements IImageProcessor {
 		this.upSampler = new InitialUpSampler();
 		this.upSampledMatrix = this.upSampler.perform();
 		
-		//this.upSampler.cleanup();
 	}
 
 	@Override
 	public void Process() {
+		//blur the image
 		this.blurOperator = new GaussianBlur(this.upSampledMatrix);
 		this.blurOperator.setParameters(13, 13, 1.5, 1.5);
 		this.blurOutputMatrix = this.blurOperator.perform();
-		//this.blurOperator.cleanup();
+		
+		//deblur the image using unsharp mask
+		this.unsharpMask = new UnsharpenMask(this.upSampledMatrix, this.blurOutputMatrix);
+		this.sharpenedMatrix = this.unsharpMask.perform();
+		
+		//save for debug
+		ImageSaver tempSaver = new ImageSaver(this.sharpenedMatrix);
+		tempSaver.encodeAndSave("sharpened");
 	}
 
 	@Override
 	public void PostProcess() {
 		this.imageSaver = new ImageSaver(this.blurOutputMatrix);
 		this.imageSaver.encodeAndSave();
+		
+		this.upSampler.cleanup();
+		this.blurOperator.cleanup();
 	}
 
 	@Override

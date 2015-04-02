@@ -162,7 +162,7 @@ public class ImageWriter implements NotificationListener {
 	public void saveSpecifiedImage(byte[] imageData, String fileName) {
 		try {
 			if(imageData != null) {
-				File processedImageFile = new File(this.proposedPath, fileName);
+				File processedImageFile = new File(this.proposedPath, fileName + ".jpg");
 				FileOutputStream fos = new FileOutputStream(processedImageFile);
 				fos.write(imageData);
 				fos.close();
