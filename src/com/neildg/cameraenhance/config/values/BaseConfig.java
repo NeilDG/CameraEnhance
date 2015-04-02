@@ -14,6 +14,8 @@ public abstract class BaseConfig {
 	
 	protected long shutterDelay = DefaultConfigValues.SHUTTER_DELAY;	//delay between capture represented in milliseconds
 	protected int imageLimit = DefaultConfigValues.NUM_IMAGES_TO_CAPTURE;	//number of images to capture
+	protected int defaultWidth = DefaultConfigValues.DEFAULT_CAMERA_WIDTH;	//default camera width
+	protected int defaultHeight = DefaultConfigValues.DEFAULT_CAMERA_HEIGHT; //default camera height
 	
 	public BaseConfig() {
 		this.configure();
@@ -27,5 +29,13 @@ public abstract class BaseConfig {
 	
 	public int getImageLimit() {
 		return this.imageLimit;
+	}
+	
+	public int getCameraWidth() {
+		return this.defaultWidth;
+	}
+	
+	public int getCameraHeight() {
+		return this.defaultHeight;
 	}
 }

@@ -15,6 +15,9 @@ public class MultipleImageConfig extends BaseConfig {
 	protected void configure() {
 		this.imageLimit = 10;
 		this.shutterDelay = 100;
+		
+		this.defaultWidth = 300;
+		this.defaultHeight = 300;
 	}
 	
 }
