@@ -9,6 +9,7 @@ import com.neildg.cameraenhance.processing.fastupsample.operators.GaussianBlur;
 import com.neildg.cameraenhance.processing.fastupsample.operators.InitialUpSampler;
 import com.neildg.cameraenhance.processing.fastupsample.operators.UnsharpenMask;
 import com.neildg.cameraenhance.processing.fastupsample.saving.ImageSaver;
+import com.neildg.cameraenhance.processing.psnr.PeakSNR;
 import com.neildg.cameraenhance.ui.ProgressDialogHandler;
 
 /**
@@ -54,22 +55,29 @@ public class FastSampleProcessor implements IImageProcessor {
 		this.sharpenedMatrix = this.unsharpMask.perform();
 		
 		//save for debug
-		ImageSaver tempSaver = new ImageSaver(this.sharpenedMatrix);
+		ImageSaver tempSaver = new ImageSaver(this.blurOutputMatrix);
+		tempSaver.encodeAndSave("blurred");
+		
+		tempSaver = new ImageSaver(this.sharpenedMatrix);
 		tempSaver.encodeAndSave("sharpened");
 	}
 
 	@Override
 	public void PostProcess() {
+		
+		Log.d(TAG, "PSNR: " +PeakSNR.getPSNR(this.blurOutputMatrix, this.sharpenedMatrix));
+		
 		this.imageSaver = new ImageSaver(this.blurOutputMatrix);
 		this.imageSaver.encodeAndSave();
 		
 		this.upSampler.cleanup();
 		this.blurOperator.cleanup();
+		this.unsharpMask.cleanup();
 	}
 
 	@Override
 	public void onPreProcessStarted() {
-		ProgressDialogHandler.getInstance().showDialog("Processing", "Upsampling image");
+		ProgressDialogHandler.getInstance().showDialog("Initializing", "Upsampling image");
 	}
 
 	@Override
@@ -89,13 +97,11 @@ public class FastSampleProcessor implements IImageProcessor {
 
 	@Override
 	public void onPostProcessStarted() {
-		// TODO Auto-generated method stub
-		
+		ProgressDialogHandler.getInstance().showDialog("Post processing", "Encoding image");
 	}
 
 	@Override
 	public void onPostProcessFinished() {
-		// TODO Auto-generated method stub
-		
+		ProgressDialogHandler.getInstance().hideDialog();
 	}
 }
