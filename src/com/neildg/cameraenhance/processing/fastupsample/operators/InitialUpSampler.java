@@ -15,6 +15,7 @@ import android.graphics.Bitmap;
 import android.util.Log;
 
 import com.neildg.cameraenhance.camera.CameraManager;
+import com.neildg.cameraenhance.config.values.DefaultConfigValues;
 import com.neildg.cameraenhance.images.ImageDataStorage;
 import com.neildg.cameraenhance.thumbnail.BitmapDecoder;
 
@@ -27,7 +28,7 @@ public class InitialUpSampler extends BaseOperator {
 	private final static String TAG = "CameraEnhance_InitialUpSampler";
 	
 	private byte[] originalImage;
-	private int upSampleFactor = 4;
+	private int upSampleFactor = DefaultConfigValues.UP_SAMPLE_FACTOR;
 	
 	public InitialUpSampler() {
 		this.originalImage = ImageDataStorage.getInstance().loadOriginalImage();
@@ -58,9 +59,6 @@ public class InitialUpSampler extends BaseOperator {
 		//MAT is represented as row-major format. Therefore, it's height X width
 		this.outputMatrix = new Mat(this.inputMatrix.height() * this.upSampleFactor, this.inputMatrix.width() * this.upSampleFactor, this.inputMatrix.type());
 		Imgproc.resize(this.inputMatrix, this.outputMatrix, this.outputMatrix.size(), 0, 0, Imgproc.INTER_CUBIC);
-
-		this.inputMatrix.release(); 
-		this.inputMatrix = null;
 
 		return this.outputMatrix;
 	}

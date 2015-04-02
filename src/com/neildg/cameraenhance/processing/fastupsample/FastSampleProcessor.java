@@ -4,9 +4,12 @@ import org.opencv.core.Mat;
 
 import android.util.Log;
 
+import com.neildg.cameraenhance.config.values.DefaultConfigValues;
+import com.neildg.cameraenhance.images.ImageDataStorage;
 import com.neildg.cameraenhance.processing.IImageProcessor;
 import com.neildg.cameraenhance.processing.fastupsample.operators.GaussianBlur;
 import com.neildg.cameraenhance.processing.fastupsample.operators.InitialUpSampler;
+import com.neildg.cameraenhance.processing.fastupsample.operators.PixelSubstitution;
 import com.neildg.cameraenhance.processing.fastupsample.operators.UnsharpenMask;
 import com.neildg.cameraenhance.processing.fastupsample.saving.ImageSaver;
 import com.neildg.cameraenhance.processing.psnr.PeakSNR;
@@ -24,13 +27,14 @@ public class FastSampleProcessor implements IImageProcessor {
 	private InitialUpSampler upSampler;
 	private GaussianBlur blurOperator;
 	private UnsharpenMask unsharpMask;
+	private PixelSubstitution pixelSubstitution;
 	
 	private ImageSaver imageSaver;
 	
 	private Mat upSampledMatrix;
 	private Mat blurOutputMatrix;
 	private Mat sharpenedMatrix;
-	
+	private Mat pixelSubMatrix;
 	
 	public FastSampleProcessor() {
 		
@@ -60,6 +64,15 @@ public class FastSampleProcessor implements IImageProcessor {
 		
 		tempSaver = new ImageSaver(this.sharpenedMatrix);
 		tempSaver.encodeAndSave("sharpened");
+		
+		//perform pixel substitution
+		Mat lowResMatrix = ImageDataStorage.getInstance().loadMatFormOfOriginalImage();
+		
+		this.pixelSubstitution = new PixelSubstitution(lowResMatrix,this.sharpenedMatrix, DefaultConfigValues.UP_SAMPLE_FACTOR);
+		this.pixelSubMatrix = this.pixelSubstitution.perform();
+		
+		tempSaver = new ImageSaver(this.pixelSubMatrix);
+		tempSaver.encodeAndSave("pixel_replaced");
 	}
 
 	@Override
@@ -67,27 +80,28 @@ public class FastSampleProcessor implements IImageProcessor {
 		
 		Log.d(TAG, "PSNR: " +PeakSNR.getPSNR(this.blurOutputMatrix, this.sharpenedMatrix));
 		
-		this.imageSaver = new ImageSaver(this.blurOutputMatrix);
+		this.imageSaver = new ImageSaver(this.pixelSubMatrix);
 		this.imageSaver.encodeAndSave();
 		
 		this.upSampler.cleanup();
 		this.blurOperator.cleanup();
 		this.unsharpMask.cleanup();
+		this.pixelSubstitution.cleanup();
 	}
 
 	@Override
 	public void onPreProcessStarted() {
-		ProgressDialogHandler.getInstance().showDialog("Initializing", "Upsampling image");
+		//ProgressDialogHandler.getInstance().showDialog("Initializing", "Upsampling image");
 	}
 
 	@Override
 	public void onPreProcessFinished() {
-		ProgressDialogHandler.getInstance().hideDialog();
+		//ProgressDialogHandler.getInstance().hideDialog();
 	}
 
 	@Override
 	public void onProcessStarted() {
-		ProgressDialogHandler.getInstance().showDialog("Processing", "Blurring image");
+		ProgressDialogHandler.getInstance().showDialog("Processing", "Refining image");
 	}
 
 	@Override
