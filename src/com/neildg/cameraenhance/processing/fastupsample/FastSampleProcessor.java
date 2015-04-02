@@ -1,8 +1,13 @@
 package com.neildg.cameraenhance.processing.fastupsample;
 
+import org.opencv.core.Mat;
+
 import android.util.Log;
 
 import com.neildg.cameraenhance.processing.IImageProcessor;
+import com.neildg.cameraenhance.processing.fastupsample.operators.GaussianBlur;
+import com.neildg.cameraenhance.processing.fastupsample.operators.InitialUpSampler;
+import com.neildg.cameraenhance.processing.fastupsample.saving.ImageSaver;
 import com.neildg.cameraenhance.ui.ProgressDialogHandler;
 
 /**
@@ -15,6 +20,13 @@ public class FastSampleProcessor implements IImageProcessor {
 	private final static String TAG = "CameraEnhance_FastSampleProcessor";
 	
 	private InitialUpSampler upSampler;
+	private GaussianBlur blurOperator;
+	
+	private ImageSaver imageSaver;
+	
+	private Mat upSampledMatrix;
+	private Mat blurOutputMatrix;
+	
 	
 	public FastSampleProcessor() {
 		
@@ -23,18 +35,23 @@ public class FastSampleProcessor implements IImageProcessor {
 	@Override
 	public void Preprocess() {
 		this.upSampler = new InitialUpSampler();
+		this.upSampledMatrix = this.upSampler.perform();
+		
+		//this.upSampler.cleanup();
 	}
 
 	@Override
 	public void Process() {
-		Log.d(TAG, "Initial up sampling!");
-		this.upSampler.performUpSampling();
+		this.blurOperator = new GaussianBlur(this.upSampledMatrix);
+		this.blurOperator.setParameters(13, 13, 1.5, 1.5);
+		this.blurOutputMatrix = this.blurOperator.perform();
+		//this.blurOperator.cleanup();
 	}
 
 	@Override
 	public void PostProcess() {
-		// TODO Auto-generated method stub
-		
+		this.imageSaver = new ImageSaver(this.blurOutputMatrix);
+		this.imageSaver.encodeAndSave();
 	}
 
 	@Override
@@ -44,12 +61,12 @@ public class FastSampleProcessor implements IImageProcessor {
 
 	@Override
 	public void onPreProcessFinished() {
+		ProgressDialogHandler.getInstance().hideDialog();
 	}
 
 	@Override
 	public void onProcessStarted() {
-		// TODO Auto-generated method stub
-		
+		ProgressDialogHandler.getInstance().showDialog("Processing", "Blurring image");
 	}
 
 	@Override

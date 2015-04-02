@@ -167,7 +167,6 @@ public class CameraManager {
 	public void setupCameraForShutter() {
 		 this.deviceCamera.stopPreview();
 		 Camera.Parameters parameters = this.deviceCamera.getParameters();
-		 this.defaultPreviewSize = this.deviceCamera.getParameters().getPreviewSize();
 		 
 		 //preview size should use the actual one.
 		 Size pictureSize = parameters.getPictureSize();
@@ -251,6 +250,7 @@ public class CameraManager {
 	
 	public void setCameraSettings() {
 		 Camera.Parameters parameters = this.deviceCamera.getParameters();
+		 this.defaultPreviewSize = this.deviceCamera.getParameters().getPreviewSize();
 		 
 		 BaseConfig baseConfig = ConfigHandler.getInstance().getCurrentConfig();
 		 Camera.Size closestSize = this.getBestPictureSizedBasedOnArea(baseConfig.getCameraWidth(), baseConfig.getCameraHeight());

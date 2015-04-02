@@ -1,7 +1,7 @@
 /**
  * 
  */
-package com.neildg.cameraenhance.processing.fastupsample;
+package com.neildg.cameraenhance.processing.fastupsample.operators;
 
 import org.opencv.android.Utils;
 import org.opencv.core.CvType;
@@ -23,14 +23,11 @@ import com.neildg.cameraenhance.thumbnail.BitmapDecoder;
  * @author NeilDG
  *
  */
-public class InitialUpSampler {
+public class InitialUpSampler extends BaseOperator {
 	private final static String TAG = "CameraEnhance_InitialUpSampler";
 	
 	private byte[] originalImage;
 	private int upSampleFactor = 4;
-	
-	private Mat originalMatrix;
-	private Mat resizedMatrix;
 	
 	public InitialUpSampler() {
 		this.originalImage = ImageDataStorage.getInstance().loadOriginalImage();
@@ -40,11 +37,12 @@ public class InitialUpSampler {
 		return this.upSampleFactor;
 	}
 	
+
 	/**
-	 * Starts the upsampling using bicubic interpolation
+	 * Starts upsampling using bicubic interpolation
 	 */
-	public void performUpSampling() {
-		
+	@Override
+	public Mat perform() {
 		//use the original image and actual camera size, not the shutter size
 		//since we'll only process one image, use the original (higher resolution) instead of the image sequences
 		int width = CameraManager.getInstance().getActualCameraSize().width;
@@ -54,21 +52,25 @@ public class InitialUpSampler {
 		this.originalMatrix = new Mat();
 		Utils.bitmapToMat(bitmap, this.originalMatrix);*/
 		
-		this.originalMatrix = ImageDataStorage.getInstance().loadMatFormOfOriginalImage();
+		this.inputMatrix = ImageDataStorage.getInstance().loadMatFormOfOriginalImage();
 		Log.d(TAG, "Width: " +width+ " Height: " +height);
 		
 		//MAT is represented as row-major format. Therefore, it's height X width
-		this.resizedMatrix = new Mat(this.originalMatrix.height() * this.upSampleFactor, this.originalMatrix.width() * this.upSampleFactor, this.originalMatrix.type());
-		Imgproc.resize(this.originalMatrix, this.resizedMatrix, this.resizedMatrix.size(), 0, 0, Imgproc.INTER_CUBIC);
+		this.outputMatrix = new Mat(this.inputMatrix.height() * this.upSampleFactor, this.inputMatrix.width() * this.upSampleFactor, this.inputMatrix.type());
+		Imgproc.resize(this.inputMatrix, this.outputMatrix, this.outputMatrix.size(), 0, 0, Imgproc.INTER_CUBIC);
+
+		this.inputMatrix.release(); 
+		this.inputMatrix = null;
+
+		return this.outputMatrix;
+	}
+	
+	@Override
+	public void cleanup() {
+		super.cleanup();
 		
-		Size kernelSize = new Size(13, 13);
-		Imgproc.GaussianBlur(this.resizedMatrix, this.resizedMatrix, kernelSize, 1.5, 1.5);
-		
-		//convert to byte form
-		MatOfByte matOfByte = new MatOfByte();
-        Highgui.imencode(".jpg",this.resizedMatrix, matOfByte);
-        
-        ImageDataStorage.getInstance().setProcessImageData(matOfByte.toArray());
-        ImageDataStorage.getInstance().storeProcessImageData();
+		if(this.originalImage != null) {
+			this.originalImage = null;
+		}
 	}
 }
