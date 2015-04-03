@@ -30,13 +30,9 @@ public class PixelSubstitution extends BaseOperator {
 	 * @param upSampleFactor - the upsampled factor of image
 	 */
 	public PixelSubstitution(Mat lowResMatrix, Mat sharpenedMatrix, int upSampleFactor) {
-		this.inputMatrix = new Mat();
-		this.outputMatrix = new Mat();
+		this.inputMatrix = lowResMatrix;
+		this.outputMatrix = sharpenedMatrix;
 		this.upSampleFactor = upSampleFactor;
-		
-		lowResMatrix.copyTo(this.inputMatrix);
-		sharpenedMatrix.copyTo(this.outputMatrix);
-		
 	}
 	
 	@Override

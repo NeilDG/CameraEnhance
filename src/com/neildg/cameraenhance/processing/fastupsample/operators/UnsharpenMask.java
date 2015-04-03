@@ -18,11 +18,8 @@ public class UnsharpenMask extends BaseOperator {
 	
 	
 	public UnsharpenMask(Mat originalMatrix, Mat blurredMatrix) {
-		this.inputMatrix = new Mat();
-		this.outputMatrix = new Mat();
-		
-		originalMatrix.copyTo(this.inputMatrix);
-		blurredMatrix.copyTo(this.outputMatrix);
+		this.inputMatrix = originalMatrix;
+		this.outputMatrix = blurredMatrix;
 		
 		Log.d(TAG , "Input size: " +this.inputMatrix.size().area() + " Output size: " +this.outputMatrix.size().area());
 	}

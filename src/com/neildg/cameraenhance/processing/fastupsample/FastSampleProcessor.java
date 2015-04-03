@@ -24,6 +24,8 @@ import com.neildg.cameraenhance.ui.ProgressDialogHandler;
 public class FastSampleProcessor implements IImageProcessor {
 	private final static String TAG = "CameraEnhance_FastSampleProcessor";
 	
+	private final static int MAX_ITERATIONS = 4;
+	
 	private InitialUpSampler upSampler;
 	private GaussianBlur blurOperator;
 	private UnsharpenMask unsharpMask;
@@ -32,9 +34,7 @@ public class FastSampleProcessor implements IImageProcessor {
 	private ImageSaver imageSaver;
 	
 	private Mat upSampledMatrix;
-	private Mat blurOutputMatrix;
-	private Mat sharpenedMatrix;
-	private Mat pixelSubMatrix;
+	private Mat processingMatrix;
 	
 	public FastSampleProcessor() {
 		
@@ -43,44 +43,60 @@ public class FastSampleProcessor implements IImageProcessor {
 	@Override
 	public void Preprocess() {
 		this.upSampler = new InitialUpSampler();
-		this.upSampledMatrix = this.upSampler.perform();
+		this.processingMatrix = this.upSampler.perform();
 		
+		this.upSampledMatrix = new Mat();
+		this.processingMatrix.copyTo(this.upSampledMatrix);
 	}
 
 	@Override
 	public void Process() {
-		//blur the image
-		this.blurOperator = new GaussianBlur(this.upSampledMatrix);
-		this.blurOperator.setParameters(13, 13, 1.5, 1.5);
-		this.blurOutputMatrix = this.blurOperator.perform();
 		
-		//deblur the image using unsharp mask
-		this.unsharpMask = new UnsharpenMask(this.upSampledMatrix, this.blurOutputMatrix);
-		this.sharpenedMatrix = this.unsharpMask.perform();
+		for(int i = 0; i < MAX_ITERATIONS; i++) {
+			
+			ProgressDialogHandler.getInstance().showDialog("Refining", "Iteration count: " +i);
+			
+			//blur image
+			this.blurOperator = new GaussianBlur(this.upSampledMatrix, this.processingMatrix);
+			this.blurOperator.setParameters(13, 13, 1.5, 1.5);
+			this.processingMatrix = this.blurOperator.perform();
+			
+			//save for checking
+			ImageSaver tempSaver = new ImageSaver(this.processingMatrix);
+			tempSaver.encodeAndSave("blurred_"+i);
+			
+			//deblur the image using unsharp mask
+			this.unsharpMask = new UnsharpenMask(this.upSampledMatrix, this.processingMatrix);
+			this.processingMatrix = this.unsharpMask.perform();
+			
+			//save for checking
+			tempSaver = new ImageSaver(this.processingMatrix);
+			tempSaver.encodeAndSave("sharpened_"+i);
+			
+			//perform pixel substitution
+			Mat lowResMatrix = ImageDataStorage.getInstance().loadMatFormOfOriginalImage();
+			this.pixelSubstitution = new PixelSubstitution(lowResMatrix, this.processingMatrix, DefaultConfigValues.UP_SAMPLE_FACTOR);
+			this.processingMatrix = this.pixelSubstitution.perform();
+			
+			tempSaver = new ImageSaver(this.processingMatrix);
+			tempSaver.encodeAndSave("pixel_replaced_"+i);
+			
+			/*this.upSampler.cleanup();
+			this.blurOperator.cleanup();
+			this.unsharpMask.cleanup();
+			this.pixelSubstitution.cleanup();*/
+			
+			ProgressDialogHandler.getInstance().hideDialog();
+		}
 		
-		//save for debug
-		ImageSaver tempSaver = new ImageSaver(this.blurOutputMatrix);
-		tempSaver.encodeAndSave("blurred");
-		
-		tempSaver = new ImageSaver(this.sharpenedMatrix);
-		tempSaver.encodeAndSave("sharpened");
-		
-		//perform pixel substitution
-		Mat lowResMatrix = ImageDataStorage.getInstance().loadMatFormOfOriginalImage();
-		
-		this.pixelSubstitution = new PixelSubstitution(lowResMatrix,this.sharpenedMatrix, DefaultConfigValues.UP_SAMPLE_FACTOR);
-		this.pixelSubMatrix = this.pixelSubstitution.perform();
-		
-		tempSaver = new ImageSaver(this.pixelSubMatrix);
-		tempSaver.encodeAndSave("pixel_replaced");
 	}
 
 	@Override
 	public void PostProcess() {
 		
-		Log.d(TAG, "PSNR: " +PeakSNR.getPSNR(this.blurOutputMatrix, this.sharpenedMatrix));
+		//Log.d(TAG, "PSNR: " +PeakSNR.getPSNR(this.blurOutputMatrix, this.sharpenedMatrix));
 		
-		this.imageSaver = new ImageSaver(this.pixelSubMatrix);
+		this.imageSaver = new ImageSaver(this.processingMatrix);
 		this.imageSaver.encodeAndSave();
 		
 		this.upSampler.cleanup();

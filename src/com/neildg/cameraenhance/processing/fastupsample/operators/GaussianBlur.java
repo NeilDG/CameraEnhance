@@ -19,16 +19,17 @@ public class GaussianBlur extends BaseOperator {
 	private double sigmaX = 0.0;
 	private double sigmaY = 0.0;
 	
-	public GaussianBlur(Mat inputMatrix) {
+	public GaussianBlur(Mat inputMatrix, Mat outputMatrix) {
+		//this.inputMatrix = new Mat();
+		//inputMatrix.copyTo(this.inputMatrix);
 		this.inputMatrix = inputMatrix;
+		this.outputMatrix = outputMatrix;
 	}
 	
 	public void setParameters(int kernelWidth, int kernelHeight, double sigmaX, double sigmaY) {
 		this.kernelSize = new Size(kernelWidth, kernelHeight);
 		this.sigmaX = sigmaX;
 		this.sigmaY = sigmaY;
-		
-		this.outputMatrix = new Mat();
 	}
 
 	@Override

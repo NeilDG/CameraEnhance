@@ -57,7 +57,10 @@ public class InitialUpSampler extends BaseOperator {
 		Log.d(TAG, "Width: " +width+ " Height: " +height);
 		
 		//MAT is represented as row-major format. Therefore, it's height X width
-		this.outputMatrix = new Mat(this.inputMatrix.height() * this.upSampleFactor, this.inputMatrix.width() * this.upSampleFactor, this.inputMatrix.type());
+		if(this.outputMatrix == null) {
+			this.outputMatrix = new Mat(this.inputMatrix.height() * this.upSampleFactor, this.inputMatrix.width() * this.upSampleFactor, this.inputMatrix.type());
+		}
+		
 		Imgproc.resize(this.inputMatrix, this.outputMatrix, this.outputMatrix.size(), 0, 0, Imgproc.INTER_CUBIC);
 
 		return this.outputMatrix;
