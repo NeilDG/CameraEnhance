@@ -1,7 +1,7 @@
 /**
  * 
  */
-package com.neildg.cameraenhance.processing.fastupsample.saving;
+package com.neildg.cameraenhance.processing.saving;
 
 import org.opencv.core.Mat;
 import org.opencv.core.MatOfByte;

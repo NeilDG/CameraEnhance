@@ -11,8 +11,8 @@ import com.neildg.cameraenhance.processing.fastupsample.operators.GaussianBlur;
 import com.neildg.cameraenhance.processing.fastupsample.operators.InitialUpSampler;
 import com.neildg.cameraenhance.processing.fastupsample.operators.PixelSubstitution;
 import com.neildg.cameraenhance.processing.fastupsample.operators.UnsharpenMask;
-import com.neildg.cameraenhance.processing.fastupsample.saving.ImageSaver;
 import com.neildg.cameraenhance.processing.psnr.PeakSNR;
+import com.neildg.cameraenhance.processing.saving.ImageSaver;
 import com.neildg.cameraenhance.ui.ProgressDialogHandler;
 
 /**
@@ -43,10 +43,12 @@ public class FastSampleProcessor implements IImageProcessor {
 	@Override
 	public void Preprocess() {
 		this.upSampler = new InitialUpSampler();
-		this.processingMatrix = this.upSampler.perform();
+		this.upSampledMatrix = this.upSampler.perform();
+		this.processingMatrix = new Mat();
 		
-		this.upSampledMatrix = new Mat();
-		this.processingMatrix.copyTo(this.upSampledMatrix);
+		//save for checking
+		ImageSaver tempSaver = new ImageSaver(this.upSampledMatrix);
+		tempSaver.encodeAndSave("bicubic");
 	}
 
 	@Override
@@ -72,6 +74,19 @@ public class FastSampleProcessor implements IImageProcessor {
 			//save for checking
 			tempSaver = new ImageSaver(this.processingMatrix);
 			tempSaver.encodeAndSave("sharpened_"+i);
+			
+			if(i == MAX_ITERATIONS - 1) {
+				break;
+			}
+			
+			//blur again
+			this.blurOperator = new GaussianBlur(this.processingMatrix, this.processingMatrix);
+			this.blurOperator.setParameters(13, 13, 1.5, 1.5);
+			this.processingMatrix = this.blurOperator.perform();
+			
+			//save for checking
+			tempSaver = new ImageSaver(this.processingMatrix);
+			tempSaver.encodeAndSave("reblurred_"+i);
 			
 			//perform pixel substitution
 			Mat lowResMatrix = ImageDataStorage.getInstance().loadMatFormOfOriginalImage();
@@ -107,27 +122,24 @@ public class FastSampleProcessor implements IImageProcessor {
 
 	@Override
 	public void onPreProcessStarted() {
-		//ProgressDialogHandler.getInstance().showDialog("Initializing", "Upsampling image");
+		ProgressDialogHandler.getInstance().showDialog("Initializing", "Upsampling image");
 	}
 
 	@Override
 	public void onPreProcessFinished() {
-		//ProgressDialogHandler.getInstance().hideDialog();
-	}
-
-	@Override
-	public void onProcessStarted() {
-		ProgressDialogHandler.getInstance().showDialog("Processing", "Refining image");
-	}
-
-	@Override
-	public void onProcessFinished() {
 		ProgressDialogHandler.getInstance().hideDialog();
 	}
 
 	@Override
+	public void onProcessStarted() {
+	}
+
+	@Override
+	public void onProcessFinished() {
+	}
+
+	@Override
 	public void onPostProcessStarted() {
-		ProgressDialogHandler.getInstance().showDialog("Post processing", "Encoding image");
 	}
 
 	@Override
