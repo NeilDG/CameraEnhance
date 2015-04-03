@@ -11,6 +11,7 @@ import com.neildg.cameraenhance.processing.fastupsample.operators.GaussianBlur;
 import com.neildg.cameraenhance.processing.fastupsample.operators.InitialUpSampler;
 import com.neildg.cameraenhance.processing.fastupsample.operators.PixelSubstitution;
 import com.neildg.cameraenhance.processing.fastupsample.operators.UnsharpenMask;
+import com.neildg.cameraenhance.processing.fastupsample.operators.WienerFilter;
 import com.neildg.cameraenhance.processing.psnr.PeakSNR;
 import com.neildg.cameraenhance.processing.saving.ImageSaver;
 import com.neildg.cameraenhance.ui.ProgressDialogHandler;
@@ -29,6 +30,7 @@ public class FastSampleProcessor implements IImageProcessor {
 	private InitialUpSampler upSampler;
 	private GaussianBlur blurOperator;
 	private UnsharpenMask unsharpMask;
+	//private WienerFilter wienerFilter;
 	private PixelSubstitution pixelSubstitution;
 	
 	private ImageSaver imageSaver;
@@ -58,7 +60,7 @@ public class FastSampleProcessor implements IImageProcessor {
 			
 			ProgressDialogHandler.getInstance().showDialog("Refining", "Iteration count: " +i);
 			
-			//blur image
+			//blur image (convolution)
 			this.blurOperator = new GaussianBlur(this.upSampledMatrix, this.processingMatrix);
 			this.blurOperator.setParameters(13, 13, 1.5, 1.5);
 			this.processingMatrix = this.blurOperator.perform();
@@ -67,9 +69,12 @@ public class FastSampleProcessor implements IImageProcessor {
 			ImageSaver tempSaver = new ImageSaver(this.processingMatrix);
 			tempSaver.encodeAndSave("blurred_"+i);
 			
-			//deblur the image using unsharp mask
+			//deblur the image (deconvolution)
 			this.unsharpMask = new UnsharpenMask(this.upSampledMatrix, this.processingMatrix);
 			this.processingMatrix = this.unsharpMask.perform();
+			//this.wienerFilter = new WienerFilter(this.processingMatrix, this.processingMatrix);
+			//this.wienerFilter.setParameters(13, 13);
+			//this.processingMatrix = this.wienerFilter.perform();
 			
 			//save for checking
 			tempSaver = new ImageSaver(this.processingMatrix);
@@ -117,6 +122,7 @@ public class FastSampleProcessor implements IImageProcessor {
 		this.upSampler.cleanup();
 		this.blurOperator.cleanup();
 		this.unsharpMask.cleanup();
+		//this.wienerFilter.cleanup();
 		this.pixelSubstitution.cleanup();
 	}
 

@@ -39,13 +39,6 @@ public class PixelSubstitution extends BaseOperator {
 	public Mat perform() {
 		this.outputMatrix.convertTo(this.outputMatrix, CvType.CV_64FC3);
 		
-		/*for(int i = 0; i < this.outputMatrix.height(); i++) {
-			for(int j = 0; j < this.outputMatrix.width(); j++) {
-				double[] pixelData = this.outputMatrix.get(i, j);
-				Log.d(TAG, "Pixel R: " +pixelData[RED_INDEX]+ " G: " +pixelData[GREEN_INDEX] + " B: " +pixelData[BLUE_INDEX]);
-			}
-		}*/
-		
 		//ROW = height
 		//COL = width
 		//replaces pixel from L based on upsampled factor
