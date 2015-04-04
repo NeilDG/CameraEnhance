@@ -28,11 +28,14 @@ public class WienerFilter extends BaseOperator {
 	public WienerFilter(Mat inputMatrix, Mat outputMatrix) {
 		this.inputMatrix = inputMatrix;
 		this.outputMatrix = outputMatrix;	
+		
+		this.inputMatrix.convertTo(this.inputMatrix, CvType.CV_32F);
+		this.outputMatrix.convertTo(this.outputMatrix, CvType.CV_32F);
 		this.depth = this.inputMatrix.depth();
 	}
 	
 	public void setParameters(int kernelWidth, int kernelHeight) {
-		this.kernel = new Mat(kernelWidth, kernelHeight, CvType.CV_32F, Scalar.all( 1.0 / (double) (kernelWidth * kernelHeight)));
+		this.kernel = new Mat(kernelWidth, kernelHeight, this.inputMatrix.type(), Scalar.all( 1.0 / (double) (kernelWidth * kernelHeight)));
 	}
 
 
