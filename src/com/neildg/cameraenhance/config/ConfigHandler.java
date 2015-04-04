@@ -31,7 +31,8 @@ public class ConfigHandler {
 		//change the configuration here
 		this.assignedConfig = new MultipleImageConfig();
 		
-		Log.d(TAG, "Initialized config. Image limit:  "+this.assignedConfig.getImageLimit()+ " Shutter delay:" +this.assignedConfig.getShutterDelay());
+		Log.d(TAG, "Initialized config. Image limit:  "+this.assignedConfig.getImageLimit()+ " Shutter delay:" +this.assignedConfig.getShutterDelay() + "Width: " +this.assignedConfig.getCameraWidth()
+				+ " Height: " +this.assignedConfig.getCameraHeight());
 	}
 	
 	public BaseConfig getCurrentConfig() {

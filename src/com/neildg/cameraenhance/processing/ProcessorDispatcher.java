@@ -3,6 +3,8 @@
  */
 package com.neildg.cameraenhance.processing;
 
+import com.neildg.cameraenhance.processing.fastupsample.FastSampleProcessor;
+import com.neildg.cameraenhance.processing.iterativeupsample.IterativeUpSampleProcessor;
 import com.neildg.cameraenhance.processing.workers.ImageWorker;
 import com.neildg.cameraenhance.utils.notifications.NotificationCenter;
 import com.neildg.cameraenhance.utils.notifications.NotificationListener;
@@ -38,7 +40,8 @@ public class ProcessorDispatcher implements NotificationListener {
 		NotificationCenter.getInstance().addObserver(Notifications.ON_IMAGE_PROCESSING_FINISHED, this);
 		
 		//IMPORTANT: define image processing task here.
-	    this.attachImageProcessor(new TestImageProcessor());
+	    this.attachImageProcessor(new FastSampleProcessor());
+		//this.attachImageProcessor(new IterativeUpSampleProcessor());
 	}
 	
 	public static void initialize() {

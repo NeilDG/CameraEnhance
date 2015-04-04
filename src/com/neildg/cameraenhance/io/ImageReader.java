@@ -7,6 +7,9 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 
+import org.opencv.core.Mat;
+import org.opencv.highgui.Highgui;
+
 import android.content.Context;
 import android.os.Environment;
 import android.util.Log;
@@ -52,6 +55,9 @@ public class ImageReader {
 		return file.isDirectory() && file.exists();
 	}
 	
+	/**
+	 * Loads the specified image and returns its byte data
+	 */
 	public byte[] getBytesFromFile(String fileName) {
 		File file = new File(ImageWriter.getInstance().getFilePath() + "/" +fileName);
 		
@@ -73,5 +79,17 @@ public class ImageReader {
 			Log.e(TAG, "Error reading file " +e.getMessage());
 			return null;
 		}
+	}
+	
+	/**
+	 * Reads an image from file and returns its matrix form represented by openCV
+	 * @param fileName
+	 * @return
+	 */
+	public Mat imReadOpenCV(String fileName) {
+		String completeFilePath = ImageWriter.getInstance().getFilePath() + "/" +fileName;
+		
+		Log.d(TAG, "Filepath for imread: " +completeFilePath);
+		return Highgui.imread(completeFilePath);
 	}
 }

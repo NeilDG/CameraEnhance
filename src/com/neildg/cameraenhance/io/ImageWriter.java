@@ -50,17 +50,19 @@ public class ImageWriter implements NotificationListener {
 	private ImageWriter(Context context) {
 		this.context = context;
 		
-		//also initialize image reader
-		ImageReader.initialize(context);
-		this.identifyDir();
 	}
 	
 	public static void initialize(Context context) {
-		sharedInstance = new ImageWriter(context);
+		
+		if(sharedInstance == null) {
+			sharedInstance = new ImageWriter(context);
+			
+			//also initialize image reader
+			ImageReader.initialize(context);
+		}
 	}
 	
 	public static void destroy() {
-		
 		//also destroy image reader
 		ImageReader.destroy();
 	}
@@ -87,6 +89,7 @@ public class ImageWriter implements NotificationListener {
 	 * Starts writing to the specified directory
 	 */
 	public void startWriting() {
+		this.identifyDir();
 		this.createNewAlbum();
 		
 		//save original image
@@ -133,8 +136,6 @@ public class ImageWriter implements NotificationListener {
 		catch(IOException e) {
 			Log.e(TAG, "Error writing original image: " +e.getMessage());
 		}
-		
-		this.identifyDir(); //identify new dir for new images
 	}
 	
 	public void saveProcessedImage(byte[] imageData) {
@@ -150,6 +151,25 @@ public class ImageWriter implements NotificationListener {
 		}
 		catch(IOException e) {
 			Log.e(TAG, "Error writing original image: " +e.getMessage());
+		}
+	}
+	
+	/**
+	 * Saves a given image for viewing or later reuse in processing.
+	 * Images saved are automatically appended with a JPEG extension.
+	 * @param imageData
+	 */
+	public void saveSpecifiedImage(byte[] imageData, String fileName) {
+		try {
+			if(imageData != null) {
+				File processedImageFile = new File(this.proposedPath, fileName + ".jpg");
+				FileOutputStream fos = new FileOutputStream(processedImageFile);
+				fos.write(imageData);
+				fos.close();
+			}
+		}
+		catch(IOException e) {
+			Log.e(TAG, "Error writing image: " +e.getMessage());
 		}
 	}
 

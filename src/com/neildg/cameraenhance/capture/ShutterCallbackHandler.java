@@ -10,6 +10,8 @@ import com.neildg.cameraenhance.config.ConfigHandler;
 import com.neildg.cameraenhance.config.values.BaseConfig;
 import com.neildg.cameraenhance.io.ImageWriter;
 import com.neildg.cameraenhance.ui.ProgressDialogHandler;
+import com.neildg.cameraenhance.utils.notifications.NotificationCenter;
+import com.neildg.cameraenhance.utils.notifications.Notifications;
 
 import android.hardware.Camera;
 import android.hardware.Camera.PreviewCallback;
@@ -33,7 +35,10 @@ public class ShutterCallbackHandler extends Thread implements PreviewCallback {
 	
 	@Override
 	public void run() {
-		ProgressDialogHandler.getInstance().showDialog("Taking pictures", "Do not move the device!");
+		
+		//TODO: uncomment to use burst mode
+		/*ProgressDialogHandler.getInstance().showDialog("Taking pictures", "Do not move the device!");
+		
 		Camera camera = CameraManager.getInstance().requestCamera();
 		CameraManager.getInstance().setupCameraForShutter();
 		
@@ -53,13 +58,16 @@ public class ShutterCallbackHandler extends Thread implements PreviewCallback {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-		}
+		}*/
 		
 		ImageWriter.getInstance().startWriting(); //start writing images
 		ImageSequencesHolder.getInstance().release();
 		
 		ProgressDialogHandler.getInstance().hideDialog();
 		CameraManager.getInstance().resetSettings();
+		
+		//start processing immediately
+		NotificationCenter.getInstance().postNotification(Notifications.ON_IMAGE_PROCESSING_STARTED);
 	}
 	
 	@Override

@@ -6,6 +6,8 @@ package com.neildg.cameraenhance.camera;
 import java.util.List;
 
 import com.neildg.cameraenhance.capture.CaptureCallback;
+import com.neildg.cameraenhance.config.ConfigHandler;
+import com.neildg.cameraenhance.config.values.BaseConfig;
 
 import android.content.Context;
 import android.content.pm.PackageManager;
@@ -32,7 +34,9 @@ public class CameraManager {
 	
 	private Camera deviceCamera;
 	private CameraPreview cameraPreview;
+	
 	private Size defaultPreviewSize;
+	private Size shutterSize;
 	
 	private boolean isFrontCamera = false;
 	private boolean safeToTakePicture = false;
@@ -72,13 +76,15 @@ public class CameraManager {
 			return this.deviceCamera;
 		}
 		else {
-			try {
+			this.deviceCamera = Camera.open();
+			this.setCameraSettings();
+			/*try {
 		        this.deviceCamera = Camera.open(); // attempt to get a Camera instance
 		        this.setCameraSettings();
 		    }
 		    catch (Exception e){
-		       Log.e(TAG, "Camera is not available!");
-		    }
+		       Log.e(TAG, "Camera is not available! " +e.getMessage());
+		    }*/
 			
 			return this.deviceCamera;
 		}
@@ -88,6 +94,9 @@ public class CameraManager {
 		this.cameraPreview = cameraPreview;
 	}
 	
+	/**
+	 * Refreshes the camera preview
+	 */
 	public void refreshCameraPreview() {
 		if(this.deviceCamera != null) {
 			this.cameraPreview.updateCameraSource(this.deviceCamera);
@@ -153,6 +162,7 @@ public class CameraManager {
 	 */
 	public void closeCamera() {
 		if(this.deviceCamera != null) {
+			this.deviceCamera.stopPreview();
 			this.deviceCamera.release();
 			this.deviceCamera = null;
 		}
@@ -161,7 +171,6 @@ public class CameraManager {
 	public void setupCameraForShutter() {
 		 this.deviceCamera.stopPreview();
 		 Camera.Parameters parameters = this.deviceCamera.getParameters();
-		 this.defaultPreviewSize = this.deviceCamera.getParameters().getPreviewSize();
 		 
 		 //preview size should use the actual one.
 		 Size pictureSize = parameters.getPictureSize();
@@ -170,11 +179,19 @@ public class CameraManager {
 		 int largestHeight = pictureSize.height;
 		 
 		 Camera.Size bestPictureSize = this.getBestPictureSize(largestWidth, largestHeight);
-				 
+		 this.shutterSize = bestPictureSize;
+		 
 		 parameters.setPreviewSize(bestPictureSize.width, bestPictureSize.height);
 		 this.deviceCamera.setParameters(parameters);
-		 
 		 this.deviceCamera.startPreview();
+	}
+	
+	public Camera.Size getShutterSize() {
+		return this.shutterSize;
+	}
+	
+	public Camera.Size getActualCameraSize() {
+		return this.deviceCamera.getParameters().getPictureSize();
 	}
 	
 	private Camera.Size getBestPictureSize(int width, int height)
@@ -199,6 +216,32 @@ public class CameraManager {
 
 	}
 	
+	/**
+	 * Finds the best picture size based on area
+	 * @param width
+	 * @param height
+	 * @return
+	 */
+	private Camera.Size getBestPictureSizedBasedOnArea(int width, int height) {
+		Camera.Size result = null;
+		Camera.Parameters p = this.deviceCamera.getParameters();
+		
+		List<Camera.Size> pictureSizes = p.getSupportedPictureSizes();
+		int intendedArea = width * height;
+		
+		for(int i = 0; i < pictureSizes.size(); i++) {
+			Camera.Size size = pictureSizes.get(i);
+			int area = size.width * size.height;
+			
+			if(area <= intendedArea) {
+				result = size;
+				//break;
+			}
+		}
+		
+		return result;
+	}
+	
 	public void resetSettings() {
 		 this.deviceCamera.stopPreview();
 		 
@@ -210,14 +253,16 @@ public class CameraManager {
 	}
 	
 	public void setCameraSettings() {
-		 /*Camera.Parameters parameters = this.deviceCamera.getParameters();
-		 List<Size> pictureSizes = parameters.getSupportedPictureSizes();
+		 Camera.Parameters parameters = this.deviceCamera.getParameters();
+		 this.defaultPreviewSize = this.deviceCamera.getParameters().getPreviewSize();
 		 
-		 int largestWidth = pictureSizes.get(pictureSizes.size() - 1).width;
-		 int largestHeight = pictureSizes.get(pictureSizes.size() - 1).height;
+		 BaseConfig baseConfig = ConfigHandler.getInstance().getCurrentConfig();
+		 Camera.Size closestSize = this.getBestPictureSizedBasedOnArea(baseConfig.getCameraWidth(), baseConfig.getCameraHeight());
+		 Log.d(TAG, "Setting picture size: " + closestSize.width + " X " +closestSize.height);
 		 
-		 parameters.setPictureSize(largestWidth, largestHeight);
-		 this.deviceCamera.setParameters(parameters);*/
+		 parameters.setSceneMode(Camera.Parameters.SCENE_MODE_HDR);
+		 parameters.setPictureSize(closestSize.width, closestSize.height);
+		 this.deviceCamera.setParameters(parameters);
 	}
 	
 	/*
