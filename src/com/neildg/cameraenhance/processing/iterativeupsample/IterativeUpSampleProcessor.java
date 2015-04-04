@@ -16,6 +16,7 @@ import com.neildg.cameraenhance.processing.operators.IncrementalUpSample;
 import com.neildg.cameraenhance.processing.operators.PixelSubstitution;
 import com.neildg.cameraenhance.processing.operators.UnsharpenMask;
 import com.neildg.cameraenhance.processing.operators.UpsampleInterpolate;
+import com.neildg.cameraenhance.processing.operators.WienerFilter;
 import com.neildg.cameraenhance.processing.saving.ImageSaver;
 import com.neildg.cameraenhance.ui.ProgressDialogHandler;
 
@@ -34,6 +35,7 @@ public class IterativeUpSampleProcessor implements IImageProcessor {
 	private IncrementalUpSample upSampler;
 	private GaussianBlur blurOperator;
 	private UnsharpenMask unsharpMask;
+	//private WienerFilter wienerFilter;
 	private PixelSubstitution pixelSubstitution;
 	
 	private ImageSaver imageSaver;
@@ -79,6 +81,9 @@ public class IterativeUpSampleProcessor implements IImageProcessor {
 			tempSaver.encodeAndSave("blurred_"+i);
 			
 			//deblur the image (deconvolution)
+			//this.wienerFilter = new WienerFilter(this.processingMatrix, this.processingMatrix);
+			//this.wienerFilter.setParameters(13, 13);
+			//this.processingMatrix = this.wienerFilter.perform();
 			this.unsharpMask = new UnsharpenMask(unblurredMatrix, this.processingMatrix);
 			this.processingMatrix = this.unsharpMask.perform();
 			unblurredMatrix.release(); unblurredMatrix = null;
@@ -88,7 +93,7 @@ public class IterativeUpSampleProcessor implements IImageProcessor {
 			tempSaver.encodeAndSave("sharpened_"+i);
 			
 			//perform pixel substitution
-			this.pixelSubstitution = new PixelSubstitution(this.originalMatrix, this.processingMatrix,(i+2));
+			this.pixelSubstitution = new PixelSubstitution(this.originalMatrix, this.processingMatrix, (i+2));
 			this.processingMatrix = this.pixelSubstitution.perform();
 			
 			tempSaver = new ImageSaver(this.processingMatrix);
@@ -114,6 +119,9 @@ public class IterativeUpSampleProcessor implements IImageProcessor {
 		//deblur the image (deconvolution)
 		this.unsharpMask = new UnsharpenMask(unblurredMatrix, this.processingMatrix);
 		this.processingMatrix = this.unsharpMask.perform();
+		//this.wienerFilter = new WienerFilter(this.processingMatrix, this.processingMatrix);
+		//this.wienerFilter.setParameters(13, 13);
+		//this.processingMatrix = this.wienerFilter.perform();
 		unblurredMatrix.release(); unblurredMatrix = null;
 		
 		//save for checking
@@ -131,6 +139,7 @@ public class IterativeUpSampleProcessor implements IImageProcessor {
 		this.blurOperator.cleanup();	this.blurOperator = null;
 		this.upSampler.cleanup();	this.upSampler = null;
 		this.unsharpMask.cleanup();	this.unsharpMask = null;
+		//this.wienerFilter.cleanup(); this.wienerFilter = null;
 		this.pixelSubstitution.cleanup(); this.pixelSubstitution = null;
 	}
 
