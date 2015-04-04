@@ -38,6 +38,7 @@ public class ImageDataStorage {
 	private byte[] processedImageData;
 	
 	private Mat originalImageMat;
+	private Hashtable<Integer, Mat> imageMatGroup;
 	
 	private BaseConfig currentConfig;
 	
@@ -173,6 +174,12 @@ public class ImageDataStorage {
 		for(int i = 0; i < ConfigHandler.getInstance().getCurrentConfig().getImageLimit(); i++) {
 			this.releaseImageSequence(i);
 		}
+		
+		this.releaseMatOfOriginalImage();
+		
+		for(int i = 0; i < ConfigHandler.getInstance().getCurrentConfig().getImageLimit(); i++) {
+			this.releaseMatOfImageSequence(i);
+		}
 	}
 	
 	/**
@@ -194,5 +201,54 @@ public class ImageDataStorage {
 			this.originalImageMat.release();
 			this.originalImageMat = null;
 		}
+	}
+	
+	/**
+	 * Loads a specified image sequence in mat form
+	 * Min = 0, Max = depends on setting
+	 */
+	public Mat loadMatOfImageSequence(int sequenceNum) {
+		String fileName = sequenceNum + ".jpg";
+		
+		if(this.imageMatGroup == null) {
+			this.imageMatGroup = new Hashtable<Integer, Mat>();
+		}
+		
+		if(sequenceNum < this.currentConfig.getImageLimit()) {
+			
+			Mat imageMat = this.imageMatGroup.get(sequenceNum);
+			if(imageMat == null) {
+				imageMat = ImageReader.getInstance().imReadOpenCV(fileName);
+				
+				if(imageMat != null) {
+					this.imageMatGroup.put(sequenceNum, imageMat);
+				}
+			}
+			
+			return imageMat;
+		}
+		else {
+			Log.e(TAG, "Exceeded sequence num! " +sequenceNum);
+			return null;
+		}
+	}
+	
+	/**
+	 * Releases the specified image sequence represented in MAT. Call this when the image frame is no longer needed
+	 */
+	public void releaseMatOfImageSequence(int sequenceNum) {
+		if(this.imageMatGroup == null) {
+			return;
+		}
+		
+		if(this.imageMatGroup.containsKey(sequenceNum)) {
+			this.imageMatGroup.remove(sequenceNum);
+		}
+		
+		if(this.imageMatGroup.size() == 0) {
+			this.imageMatGroup = null;
+		}
+		
+		System.gc();
 	}
 }

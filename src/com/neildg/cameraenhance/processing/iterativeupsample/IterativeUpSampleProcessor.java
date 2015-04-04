@@ -38,8 +38,6 @@ public class IterativeUpSampleProcessor implements IImageProcessor {
 	//private WienerFilter wienerFilter;
 	private PixelSubstitution pixelSubstitution;
 	
-	private ImageSaver imageSaver;
-	
 	private Mat originalMatrix;
 	private Mat processingMatrix;
 	
@@ -65,8 +63,7 @@ public class IterativeUpSampleProcessor implements IImageProcessor {
 			this.processingMatrix = this.upSampler.perform();
 			
 			//save for checking
-			ImageSaver tempSaver = new ImageSaver(this.processingMatrix);
-			tempSaver.encodeAndSave("bicubic_"+i);
+			ImageSaver.encodeAndSave(this.processingMatrix,"bicubic_"+i);
 			
 			//blur image (convolution)
 			Mat unblurredMatrix = new Mat();
@@ -77,8 +74,7 @@ public class IterativeUpSampleProcessor implements IImageProcessor {
 			this.processingMatrix = this.blurOperator.perform();
 			
 			//save for checking
-			tempSaver = new ImageSaver(this.processingMatrix);
-			tempSaver.encodeAndSave("blurred_"+i);
+			ImageSaver.encodeAndSave(this.processingMatrix, "blurred_"+i);
 			
 			//deblur the image (deconvolution)
 			//this.wienerFilter = new WienerFilter(this.processingMatrix, this.processingMatrix);
@@ -89,15 +85,13 @@ public class IterativeUpSampleProcessor implements IImageProcessor {
 			unblurredMatrix.release(); unblurredMatrix = null;
 			
 			//save for checking
-			tempSaver = new ImageSaver(this.processingMatrix);
-			tempSaver.encodeAndSave("sharpened_"+i);
+			ImageSaver.encodeAndSave(this.processingMatrix, "sharpened_"+i);
 			
 			//perform pixel substitution
 			this.pixelSubstitution = new PixelSubstitution(this.originalMatrix, this.processingMatrix, (i+2));
 			this.processingMatrix = this.pixelSubstitution.perform();
 			
-			tempSaver = new ImageSaver(this.processingMatrix);
-			tempSaver.encodeAndSave("pixel_replaced_"+i);
+			ImageSaver.encodeAndSave(this.processingMatrix, "pixel_replaced_"+i);
 			
 			ProgressDialogHandler.getInstance().hideDialog();
 		}
@@ -113,8 +107,7 @@ public class IterativeUpSampleProcessor implements IImageProcessor {
 		this.processingMatrix = this.blurOperator.perform();
 		
 		//save for checking
-		ImageSaver tempSaver = new ImageSaver(this.processingMatrix);
-		tempSaver.encodeAndSave("blurred_final");
+		ImageSaver.encodeAndSave(this.processingMatrix, "blurred_final");
 		
 		//deblur the image (deconvolution)
 		this.unsharpMask = new UnsharpenMask(unblurredMatrix, this.processingMatrix);
@@ -125,16 +118,14 @@ public class IterativeUpSampleProcessor implements IImageProcessor {
 		unblurredMatrix.release(); unblurredMatrix = null;
 		
 		//save for checking
-		tempSaver = new ImageSaver(this.processingMatrix);
-		tempSaver.encodeAndSave("sharpened_final");
+		ImageSaver.encodeAndSave(this.processingMatrix, "sharpened_final");
 		
 		ProgressDialogHandler.getInstance().hideDialog();
 	}
 
 	@Override
 	public void PostProcess() {
-		ImageSaver imageSaver = new ImageSaver(this.processingMatrix);
-		imageSaver.encodeAndSave();
+		ImageSaver.encodeAndSaveAsProcessed(this.processingMatrix);
 		
 		this.blurOperator.cleanup();	this.blurOperator = null;
 		this.upSampler.cleanup();	this.upSampler = null;

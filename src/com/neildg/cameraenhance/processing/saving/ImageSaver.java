@@ -18,24 +18,20 @@ import com.neildg.cameraenhance.io.ImageWriter;
 public class ImageSaver {
 	private final static String TAG = "CameraEnhance_ImageSaver";
 	
-	private Mat matrixToSave;
 	
-	public ImageSaver(Mat inputMatrix) {
-		this.matrixToSave = inputMatrix;
+	public ImageSaver() {
+		
 	}
 	
 	/**
 	 * Converts the matrix into its image form and saves it as PROCESSED image into the SDCARD
 	 */
-	public void encodeAndSave() {
+	public static void encodeAndSaveAsProcessed(Mat matrixToSave) {
 		MatOfByte matOfByte = new MatOfByte();
-		Highgui.imencode(".jpg", this.matrixToSave, matOfByte);
+		Highgui.imencode(".jpg", matrixToSave, matOfByte);
 		
 		ImageDataStorage.getInstance().setProcessImageData(matOfByte.toArray());
 		ImageDataStorage.getInstance().storeProcessImageData();
-		
-		this.matrixToSave.release();
-		this.matrixToSave = null;
 		
 		matOfByte.release();
 		matOfByte = null;
@@ -45,9 +41,9 @@ public class ImageSaver {
 	 * Converts the matrix into its image form and saves it using a given filename
 	 * @param fileName
 	 */
-	public void encodeAndSave(String fileName) {
+	public static void encodeAndSave(Mat matrixToSave, String fileName) {
 		MatOfByte matOfByte = new MatOfByte();
-		Highgui.imencode(".jpg", this.matrixToSave, matOfByte);
+		Highgui.imencode(".jpg", matrixToSave, matOfByte);
 		
 		ImageWriter.getInstance().saveSpecifiedImage(matOfByte.toArray(), fileName);
 		
