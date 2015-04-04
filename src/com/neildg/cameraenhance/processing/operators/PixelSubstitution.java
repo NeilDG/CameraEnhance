@@ -50,8 +50,8 @@ public class PixelSubstitution extends BaseOperator {
 				pixelData[RED_INDEX] = 0;
 				pixelData[GREEN_INDEX] = 0;*/
 				
-				int rowToReplace = (row * this.upSampleFactor);
-				int colToReplace = (col * this.upSampleFactor);
+				int rowToReplace = (row * this.upSampleFactor) + 1;
+				int colToReplace = (col * this.upSampleFactor) + 1;
 				
 				if(rowToReplace < this.outputMatrix.height() && colToReplace < this.outputMatrix.width()) {
 					//Log.d(TAG, "Replaced row: " +rowToReplace+ " Col: " +colToReplace+ " PixelData R: " +pixelData[RED_INDEX]+ " G: " +pixelData[GREEN_INDEX]+ " B: " +pixelData[BLUE_INDEX]);

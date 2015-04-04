@@ -40,8 +40,8 @@ public class ProcessorDispatcher implements NotificationListener {
 		NotificationCenter.getInstance().addObserver(Notifications.ON_IMAGE_PROCESSING_FINISHED, this);
 		
 		//IMPORTANT: define image processing task here.
-	    //this.attachImageProcessor(new FastSampleProcessor());
-		this.attachImageProcessor(new IterativeUpSampleProcessor());
+	    this.attachImageProcessor(new FastSampleProcessor());
+		//this.attachImageProcessor(new IterativeUpSampleProcessor());
 	}
 	
 	public static void initialize() {

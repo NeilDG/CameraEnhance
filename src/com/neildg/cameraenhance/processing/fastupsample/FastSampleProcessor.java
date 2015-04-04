@@ -46,6 +46,7 @@ public class FastSampleProcessor implements IImageProcessor {
 		this.upSampler = new UpsampleInterpolate(DefaultConfigValues.UP_SAMPLE_FACTOR);
 		this.upSampledMatrix = this.upSampler.perform();
 		this.processingMatrix = new Mat();
+		this.upSampledMatrix.copyTo(this.processingMatrix);
 		
 		//save for checking
 		ImageSaver tempSaver = new ImageSaver(this.upSampledMatrix);
@@ -60,7 +61,7 @@ public class FastSampleProcessor implements IImageProcessor {
 			ProgressDialogHandler.getInstance().showDialog("Refining", "Iteration count: " +i);
 			
 			//blur image (convolution)
-			this.blurOperator = new GaussianBlur(this.upSampledMatrix, this.processingMatrix);
+			this.blurOperator = new GaussianBlur(this.processingMatrix, this.processingMatrix);
 			this.blurOperator.setParameters(13, 13, 1.5, 1.5);
 			this.processingMatrix = this.blurOperator.perform();
 			
@@ -80,6 +81,7 @@ public class FastSampleProcessor implements IImageProcessor {
 			tempSaver.encodeAndSave("sharpened_"+i);
 			
 			if(i == MAX_ITERATIONS - 1) {
+				ProgressDialogHandler.getInstance().hideDialog();
 				break;
 			}
 			
@@ -107,6 +109,34 @@ public class FastSampleProcessor implements IImageProcessor {
 			
 			ProgressDialogHandler.getInstance().hideDialog();
 		}
+		
+		ProgressDialogHandler.getInstance().showDialog("Refining", "Final touches using deconvolution/convolution.");
+		
+		//blur image (convolution)
+		Mat unblurredMatrix = new Mat();
+		this.processingMatrix.copyTo(unblurredMatrix);
+		
+		this.blurOperator = new GaussianBlur(this.processingMatrix, this.processingMatrix);
+		this.blurOperator.setParameters(13, 13, 1.5, 1.5);
+		this.processingMatrix = this.blurOperator.perform();
+		
+		//save for checking
+		ImageSaver tempSaver = new ImageSaver(this.processingMatrix);
+		tempSaver.encodeAndSave("blurred_final");
+		
+		//deblur the image (deconvolution)
+		this.unsharpMask = new UnsharpenMask(unblurredMatrix, this.processingMatrix);
+		this.processingMatrix = this.unsharpMask.perform();
+		//this.wienerFilter = new WienerFilter(this.processingMatrix, this.processingMatrix);
+		//this.wienerFilter.setParameters(13, 13);
+		//this.processingMatrix = this.wienerFilter.perform();
+		unblurredMatrix.release(); unblurredMatrix = null;
+		
+		//save for checking
+		tempSaver = new ImageSaver(this.processingMatrix);
+		tempSaver.encodeAndSave("sharpened_final");
+		
+		ProgressDialogHandler.getInstance().hideDialog();
 		
 	}
 
