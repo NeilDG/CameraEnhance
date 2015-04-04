@@ -1,7 +1,7 @@
 /**
  * 
  */
-package com.neildg.cameraenhance.processing.fastupsample.operators;
+package com.neildg.cameraenhance.processing.operators;
 
 import org.opencv.core.Core;
 import org.opencv.core.CvType;

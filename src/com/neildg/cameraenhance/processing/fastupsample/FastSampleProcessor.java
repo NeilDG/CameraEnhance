@@ -7,11 +7,10 @@ import android.util.Log;
 import com.neildg.cameraenhance.config.values.DefaultConfigValues;
 import com.neildg.cameraenhance.images.ImageDataStorage;
 import com.neildg.cameraenhance.processing.IImageProcessor;
-import com.neildg.cameraenhance.processing.fastupsample.operators.GaussianBlur;
-import com.neildg.cameraenhance.processing.fastupsample.operators.InitialUpSampler;
-import com.neildg.cameraenhance.processing.fastupsample.operators.PixelSubstitution;
-import com.neildg.cameraenhance.processing.fastupsample.operators.UnsharpenMask;
-import com.neildg.cameraenhance.processing.fastupsample.operators.WienerFilter;
+import com.neildg.cameraenhance.processing.operators.GaussianBlur;
+import com.neildg.cameraenhance.processing.operators.PixelSubstitution;
+import com.neildg.cameraenhance.processing.operators.UnsharpenMask;
+import com.neildg.cameraenhance.processing.operators.UpsampleInterpolate;
 import com.neildg.cameraenhance.processing.psnr.PeakSNR;
 import com.neildg.cameraenhance.processing.saving.ImageSaver;
 import com.neildg.cameraenhance.ui.ProgressDialogHandler;
@@ -27,7 +26,7 @@ public class FastSampleProcessor implements IImageProcessor {
 	
 	private final static int MAX_ITERATIONS = 4;
 	
-	private InitialUpSampler upSampler;
+	private UpsampleInterpolate upSampler;
 	private GaussianBlur blurOperator;
 	private UnsharpenMask unsharpMask;
 	//private WienerFilter wienerFilter;
@@ -44,7 +43,7 @@ public class FastSampleProcessor implements IImageProcessor {
 
 	@Override
 	public void Preprocess() {
-		this.upSampler = new InitialUpSampler();
+		this.upSampler = new UpsampleInterpolate(DefaultConfigValues.UP_SAMPLE_FACTOR);
 		this.upSampledMatrix = this.upSampler.perform();
 		this.processingMatrix = new Mat();
 		

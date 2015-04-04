@@ -1,7 +1,7 @@
 /**
  * 
  */
-package com.neildg.cameraenhance.processing.fastupsample.operators;
+package com.neildg.cameraenhance.processing.operators;
 
 import org.opencv.android.Utils;
 import org.opencv.core.CvType;
@@ -20,18 +20,19 @@ import com.neildg.cameraenhance.images.ImageDataStorage;
 import com.neildg.cameraenhance.thumbnail.BitmapDecoder;
 
 /**
- * Handles the initial upsampling.
+ * Handles the initial upsampling with a bicubic interpolation
  * @author NeilDG
  *
  */
-public class InitialUpSampler extends BaseOperator {
+public class UpsampleInterpolate extends BaseOperator {
 	private final static String TAG = "CameraEnhance_InitialUpSampler";
 	
 	private byte[] originalImage;
-	private int upSampleFactor = DefaultConfigValues.UP_SAMPLE_FACTOR;
+	private int upSampleFactor = 0;
 	
-	public InitialUpSampler() {
+	public UpsampleInterpolate(int upSampleFactor) {
 		this.originalImage = ImageDataStorage.getInstance().loadOriginalImage();
+		this.upSampleFactor = upSampleFactor;
 	}
 	
 	public int getUpSampleFactor() {
@@ -48,10 +49,6 @@ public class InitialUpSampler extends BaseOperator {
 		//since we'll only process one image, use the original (higher resolution) instead of the image sequences
 		int width = CameraManager.getInstance().getActualCameraSize().width;
 		int height = CameraManager.getInstance().getActualCameraSize().height;
-		
-		/*Bitmap bitmap = BitmapDecoder.decodeActualBitmapFromByteArray(this.originalImage);
-		this.originalMatrix = new Mat();
-		Utils.bitmapToMat(bitmap, this.originalMatrix);*/
 		
 		this.inputMatrix = ImageDataStorage.getInstance().loadMatFormOfOriginalImage();
 		Log.d(TAG, "Width: " +width+ " Height: " +height);

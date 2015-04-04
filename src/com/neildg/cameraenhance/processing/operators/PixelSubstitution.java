@@ -1,7 +1,7 @@
 /**
  * 
  */
-package com.neildg.cameraenhance.processing.fastupsample.operators;
+package com.neildg.cameraenhance.processing.operators;
 
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
@@ -18,9 +18,9 @@ import android.util.Log;
 public class PixelSubstitution extends BaseOperator {
 	private final static String TAG = "CameraEnhance_PixelSubstitution";
 	
-	private final static int BLUE_INDEX = 0;
-	private final static int GREEN_INDEX = 1;
-	private final static int RED_INDEX = 2;
+	protected final static int BLUE_INDEX = 0;
+	protected final static int GREEN_INDEX = 1;
+	protected final static int RED_INDEX = 2;
 	
 	private int upSampleFactor = 1;
 	/**
@@ -37,7 +37,6 @@ public class PixelSubstitution extends BaseOperator {
 	
 	@Override
 	public Mat perform() {
-		this.outputMatrix.convertTo(this.outputMatrix, CvType.CV_64FC3);
 		
 		//ROW = height
 		//COL = width
@@ -51,8 +50,8 @@ public class PixelSubstitution extends BaseOperator {
 				pixelData[RED_INDEX] = 0;
 				pixelData[GREEN_INDEX] = 0;*/
 				
-				int rowToReplace = (row * this.upSampleFactor) + 1;
-				int colToReplace = (col * this.upSampleFactor) + 1;
+				int rowToReplace = (row * this.upSampleFactor);
+				int colToReplace = (col * this.upSampleFactor);
 				
 				if(rowToReplace < this.outputMatrix.height() && colToReplace < this.outputMatrix.width()) {
 					//Log.d(TAG, "Replaced row: " +rowToReplace+ " Col: " +colToReplace+ " PixelData R: " +pixelData[RED_INDEX]+ " G: " +pixelData[GREEN_INDEX]+ " B: " +pixelData[BLUE_INDEX]);
