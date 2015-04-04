@@ -94,6 +94,9 @@ public class CameraManager {
 		this.cameraPreview = cameraPreview;
 	}
 	
+	/**
+	 * Refreshes the camera preview
+	 */
 	public void refreshCameraPreview() {
 		if(this.deviceCamera != null) {
 			this.cameraPreview.updateCameraSource(this.deviceCamera);
@@ -159,6 +162,7 @@ public class CameraManager {
 	 */
 	public void closeCamera() {
 		if(this.deviceCamera != null) {
+			this.deviceCamera.stopPreview();
 			this.deviceCamera.release();
 			this.deviceCamera = null;
 		}
