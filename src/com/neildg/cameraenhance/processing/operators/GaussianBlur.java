@@ -36,6 +36,7 @@ public class GaussianBlur extends BaseOperator {
 	@Override
 	public Mat perform() {
 		//Imgproc.GaussianBlur(this.inputMatrix, this.outputMatrix, this.kernelSize, this.sigmaX, this.sigmaY);
+		this.outputMatrix.convertTo(this.outputMatrix, CvType.CV_8UC1);
 		Imgproc.medianBlur(this.inputMatrix, this.outputMatrix, (int) this.kernelSize.width);
 		return this.outputMatrix;
 	}
