@@ -25,6 +25,7 @@ public class WienerFilterTest implements IImageProcessor {
 	private Mat processingMatrix;
 	
 	private GaussianBlur blurOperator;
+	//private WienerFilter wienerFilter;
 	private WienerFilter_2 wienerFilter;
 	
 	/* (non-Javadoc)
@@ -48,9 +49,13 @@ public class WienerFilterTest implements IImageProcessor {
 	 */
 	@Override
 	public void Process() {
+		//this.wienerFilter = new WienerFilter(this.processingMatrix, this.processingMatrix);
+		//this.wienerFilter.setParameters(13);
 		this.wienerFilter = new WienerFilter_2(this.processingMatrix, this.processingMatrix);
 		this.wienerFilter.setParameters(0, 13);
 		this.processingMatrix = this.wienerFilter.perform();
+		
+		ImageSaver.encodeAndSave(this.processingMatrix, "wiener_1");
 		
 	}
 

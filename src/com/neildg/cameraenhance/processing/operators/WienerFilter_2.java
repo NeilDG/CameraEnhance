@@ -17,6 +17,7 @@ import org.opencv.imgproc.Imgproc;
 
 import android.util.Log;
 
+import com.neildg.cameraenhance.processing.psnr.PeakSNR;
 import com.neildg.cameraenhance.processing.saving.ImageSaver;
 
 /**
@@ -104,22 +105,36 @@ public class WienerFilter_2 extends BaseOperator {
 		
 		Scalar psfSumScalar = Core.sumElems(pointSpreadFunc);
 		Log.d(TAG, "Sum elems: " +psfSumScalar.val[0] + " " +psfSumScalar.val[1]);
-		double psfSum = psfSumScalar.val[0];
 		
 		Mat psfPad = Mat.zeros(this.inputMatrix.rows(), this.inputMatrix.cols(), CvType.CV_64FC2);
 		int kh = psfPad.rows() - 1;
 		int kw = psfPad.cols() - 1;
-		psfPad.put(kh, kw, psfSumScalar.val[0], psfSumScalar.val[1]);
+		for(int row = 0; row < psfPad.rows(); row++) {
+			for(int col = 0; col < psfPad.cols(); col++) {
+				psfPad.put(row, col, psfSumScalar.val[0], psfSumScalar.val[1]);
+			}
+		}
+		//psfPad.put(kh, kw, psfSumScalar.val[0], psfSumScalar.val[1]);
 		
 		Mat PSF = new Mat();
 		Mat PSF2 = new Mat();
 		Core.dft(psfPad, PSF, Core.DFT_COMPLEX_OUTPUT, kh);
-		Log.d(TAG, "Sample PSF: " +PSF.get(456, 45)[0]);
+		Log.d(TAG, "Sample PSF: " +PSF.get(kh, kw)[0]);
 		
 		Scalar twoScalar = new Scalar(2,2);
 		Core.multiply(PSF, twoScalar, PSF2);
+		double PSF2SumElems = Core.sumElems(PSF2).val[0];
+		double PSF2AndNoise = PSF2SumElems + 20.12;
+		Log.d(TAG, "Sample PSF after scalar: " +PSF2.get(kh, kw)[0]);
 		
-		Log.d(TAG, "Sample PSF after scalar: " +PSF2.get(456, 45)[0]);
+		Mat iPSF = new Mat();
+		Core.divide(PSF2AndNoise, PSF, iPSF);
+		Log.d(TAG, "iPSF: " +iPSF.get(kh, kw)[0]);
+		
+		Mat RES = new Mat();
+		Core.mulSpectrums(this.outputMatrix, iPSF, RES, Core.DFT_COMPLEX_OUTPUT);
+		Core.idft(RES, this.outputMatrix, Core.DFT_REAL_OUTPUT, 0);
+		
 
 		return this.outputMatrix;
 	}
