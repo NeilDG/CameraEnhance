@@ -52,8 +52,6 @@ public class WienerFilterTest implements IImageProcessor {
 		this.wienerFilter.setParameters(0, 13);
 		this.processingMatrix = this.wienerFilter.perform();
 		
-		ImageSaver.encodeAndSave(this.processingMatrix, "dft_13");
-		
 	}
 
 	/* (non-Javadoc)
