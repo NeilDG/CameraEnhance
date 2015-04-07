@@ -6,6 +6,8 @@ package com.neildg.cameraenhance.processing.operators;
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
 
+import android.util.Log;
+
 /**
  * Incremental version of pixel substitution
  * @author NeilDG
@@ -14,11 +16,17 @@ import org.opencv.core.Mat;
 public class IncrementalPixelSubstitution extends PixelSubstitution {
 	private final static String TAG = "CameraEnhance_IncrementalPixelSubstitution";
 	
-	private float increasingConstant = 0.0f;
+	private float heightScale = 0.0f;
+	private float widthScale = 0.0f;
 	
-	public IncrementalPixelSubstitution(Mat lowResMatrix, Mat sharpenedMatrix, float increasingConstant, int iteration) {
-		super(lowResMatrix, sharpenedMatrix, 0);
-		this.increasingConstant = (increasingConstant * iteration) + 1.0f; //the basis of the upsampled factor
+	public IncrementalPixelSubstitution(Mat beforeMatrix, Mat outputMatrix) {
+		super(beforeMatrix, outputMatrix, 0);
+		
+		//compute difference in resolution
+		this.heightScale = this.outputMatrix.height() * 1.0f / this.inputMatrix.height();
+		this.widthScale = this.outputMatrix.width() * 1.0f / this.inputMatrix.width();
+		
+		Log.d(TAG, "Width scale: " +this.widthScale+ " Height scale: " +this.heightScale);
 	}
 	
 	@Override
@@ -37,8 +45,8 @@ public class IncrementalPixelSubstitution extends PixelSubstitution {
 				pixelData[RED_INDEX] = 0;
 				pixelData[GREEN_INDEX] = 0;*/
 				
-				int rowToReplace = (int)(row * this.increasingConstant);
-				int colToReplace = (int)(col * this.increasingConstant);
+				int rowToReplace =(int) Math.floor(row * this.heightScale);
+				int colToReplace =(int) Math.floor(col * this.widthScale);
 				
 				if(rowToReplace < this.outputMatrix.height() && colToReplace < this.outputMatrix.width()) {
 					//Log.d(TAG, "Replaced row: " +rowToReplace+ " Col: " +colToReplace+ " PixelData R: " +pixelData[RED_INDEX]+ " G: " +pixelData[GREEN_INDEX]+ " B: " +pixelData[BLUE_INDEX]);

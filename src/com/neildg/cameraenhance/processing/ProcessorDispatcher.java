@@ -6,7 +6,7 @@ package com.neildg.cameraenhance.processing;
 import com.neildg.cameraenhance.camera.CameraManager;
 import com.neildg.cameraenhance.processing.fastupsample.FastSampleProcessor;
 import com.neildg.cameraenhance.processing.fastupsample.UpSampleDenoising;
-import com.neildg.cameraenhance.processing.iterativeupsample.IterativeUpSampleProcessor;
+import com.neildg.cameraenhance.processing.iterativeupsample.IterativeUpSample;
 import com.neildg.cameraenhance.processing.workers.ImageWorker;
 import com.neildg.cameraenhance.unittests.processing.DenoisingTest;
 import com.neildg.cameraenhance.unittests.processing.WienerFilterTest;
@@ -47,7 +47,8 @@ public class ProcessorDispatcher implements NotificationListener {
 	    //this.attachImageProcessor(new FastSampleProcessor());
 		//this.attachImageProcessor(new IterativeUpSampleProcessor());
 		//this.attachImageProcessor(new DenoisingTest());
-		this.attachImageProcessor(new UpSampleDenoising());
+		//this.attachImageProcessor(new UpSampleDenoising());
+		this.attachImageProcessor(new IterativeUpSample());
 	}
 	
 	public static void initialize() {
