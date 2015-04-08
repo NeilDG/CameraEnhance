@@ -16,6 +16,7 @@ import com.neildg.cameraenhance.processing.operators.Denoise;
 import com.neildg.cameraenhance.processing.operators.Blur;
 import com.neildg.cameraenhance.processing.operators.IncrementalPixelSubstitution;
 import com.neildg.cameraenhance.processing.operators.IncrementalUpSample;
+import com.neildg.cameraenhance.processing.operators.LaplaceSharpening;
 import com.neildg.cameraenhance.processing.operators.UnsharpenMask;
 import com.neildg.cameraenhance.processing.operators.Blur.BlurType;
 import com.neildg.cameraenhance.processing.saving.ImageSaver;
@@ -40,9 +41,10 @@ public class IterativeUpSample implements IImageProcessor {
 	private ArrayList<Mat> splittedMatrix;
 	
 	private IncrementalUpSample upSampler;
-	private UnsharpenMask unSharpMask;
-	private Blur blur;
+	//private UnsharpenMask unSharpMask;
+	private LaplaceSharpening laplaceSharpener;
 	private IncrementalPixelSubstitution pixelSub;
+	private Blur blur;
 	
 	@Override
 	public void Preprocess() {
@@ -73,20 +75,22 @@ public class IterativeUpSample implements IImageProcessor {
 			
 			ImageSaver.encodeAndSaveAsRGB(this.yuvMatrix, "upsample_"+i);
 			
-			Core.split(this.yuvMatrix, this.splittedMatrix);
+			//temporarily converty the yuv matrix to RGB for laplace sharpening
+			Mat forLaplaceMat = new Mat(this.yuvMatrix.size(), this.yuvMatrix.type());
+			Imgproc.cvtColor(this.yuvMatrix, forLaplaceMat, Imgproc.COLOR_YUV2BGR);
 			
-			Mat noPixelSubMat = new Mat();
-			this.splittedMatrix.get(Y_CHANNEL).copyTo(noPixelSubMat);
+			this.laplaceSharpener = new LaplaceSharpening(forLaplaceMat, forLaplaceMat);
+			this.laplaceSharpener.perform();
+			ImageSaver.encodeAndSave(forLaplaceMat, "sharpened_laplace");
+			
+			Imgproc.cvtColor(forLaplaceMat, this.yuvMatrix, Imgproc.COLOR_BGR2YUV); 
+			
+			Core.split(this.yuvMatrix, this.splittedMatrix);
 			
 			this.pixelSub = new IncrementalPixelSubstitution(beforeUpSampleMat, this.splittedMatrix.get(Y_CHANNEL));
 			this.pixelSub.perform();
 			
 			ImageSaver.encodeAndSave(this.splittedMatrix.get(Y_CHANNEL), "pixelsub_"+i);
-			
-			this.unSharpMask = new UnsharpenMask(this.splittedMatrix.get(Y_CHANNEL), noPixelSubMat);
-			this.unSharpMask.perform();
-			
-			this.splittedMatrix.get(Y_CHANNEL).copyTo(beforeUpSampleMat);
 			
 			Core.merge(this.splittedMatrix, this.yuvMatrix);
 			
@@ -99,13 +103,15 @@ public class IterativeUpSample implements IImageProcessor {
 	@Override
 	public void PostProcess() {
 		Imgproc.cvtColor(this.yuvMatrix, this.yuvMatrix, Imgproc.COLOR_YUV2BGR);
+		
 		ImageSaver.encodeAndSaveAsProcessed(this.yuvMatrix);
 		
 		this.originalMatrix.release(); this.originalMatrix = null;
 		this.yuvMatrix.release(); this.yuvMatrix = null;
 		
 		this.pixelSub.cleanup(); this.pixelSub = null;
-		this.unSharpMask.cleanup(); this.unSharpMask = null;
+		//this.unSharpMask.cleanup(); this.unSharpMask = null;
+		this.laplaceSharpener.cleanup(); this.laplaceSharpener = null;
 		this.upSampler.cleanup(); this.upSampler = null;
 	}
 

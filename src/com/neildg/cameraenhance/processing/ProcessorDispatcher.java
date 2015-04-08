@@ -47,9 +47,9 @@ public class ProcessorDispatcher implements NotificationListener {
 		//IMPORTANT: define image processing task here.
 	    //this.attachImageProcessor(new FastSampleProcessor());
 		//this.attachImageProcessor(new IterativeUpSampleProcessor());
-		this.attachImageProcessor(new LaplaceSharpeningTest());
+		//this.attachImageProcessor(new LaplaceSharpeningTest());
 		//this.attachImageProcessor(new UpSampleDenoising());
-		//this.attachImageProcessor(new IterativeUpSample());
+		this.attachImageProcessor(new IterativeUpSample());
 	}
 	
 	public static void initialize() {
