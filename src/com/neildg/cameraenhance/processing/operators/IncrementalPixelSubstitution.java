@@ -40,16 +40,17 @@ public class IncrementalPixelSubstitution extends PixelSubstitution {
 			for(int col = 0; col < this.inputMatrix.width(); col++) {
 				double[] pixelData = this.inputMatrix.get(row, col);
 				
-				/*double[] pixelData = new double[3];
-				pixelData[BLUE_INDEX] = 0;
-				pixelData[RED_INDEX] = 0;
-				pixelData[GREEN_INDEX] = 0;*/
+				float rowFloat = row * this.heightScale;
+				float colFloat = col * this.widthScale;
 				
-				int rowToReplace =(int) Math.floor(row * this.heightScale);
-				int colToReplace =(int) Math.floor(col * this.widthScale);
+				float rowRemainder = rowFloat % 1;
+				float colRemainder = colFloat % 1;
 				
-				if(rowToReplace < this.outputMatrix.height() && colToReplace < this.outputMatrix.width()) {
-					//Log.d(TAG, "Replaced row: " +rowToReplace+ " Col: " +colToReplace+ " PixelData R: " +pixelData[RED_INDEX]+ " G: " +pixelData[GREEN_INDEX]+ " B: " +pixelData[BLUE_INDEX]);
+				int rowToReplace =(int) Math.floor(rowFloat);
+				int colToReplace =(int) Math.floor(colFloat);
+				
+				if(rowRemainder == 0.0f && colRemainder == 0.0f && rowToReplace < this.outputMatrix.height() && colToReplace < this.outputMatrix.width()) {
+					Log.d(TAG, "Replaced row: " +rowToReplace+ " Col: " +colToReplace);
 					this.outputMatrix.put(rowToReplace, colToReplace, pixelData);
 				}
 			}

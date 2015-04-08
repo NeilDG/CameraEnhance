@@ -6,6 +6,7 @@ package com.neildg.cameraenhance.processing.saving;
 import org.opencv.core.Mat;
 import org.opencv.core.MatOfByte;
 import org.opencv.highgui.Highgui;
+import org.opencv.imgproc.Imgproc;
 
 import com.neildg.cameraenhance.images.ImageDataStorage;
 import com.neildg.cameraenhance.io.ImageWriter;
@@ -38,7 +39,7 @@ public class ImageSaver {
 	}
 	
 	/**
-	 * Converts the matrix into its image form and saves it using a given filename
+	 * Converts the matrix into its image form and saves it using a given filename and AS IS in image type.
 	 * @param fileName
 	 */
 	public static void encodeAndSave(Mat matrixToSave, String fileName) {
@@ -49,5 +50,17 @@ public class ImageSaver {
 		
 		matOfByte.release();
 		matOfByte = null;
+	}
+	
+	/**
+	 * Converts the matrix into its image form (in YUV format) and saves it as RGB format. 
+	 * @param matrixToSave
+	 * @param fileName
+	 * @param colorType
+	 */
+	public static void encodeAndSaveAsRGB(Mat matrixToSave, String fileName) {
+		Imgproc.cvtColor(matrixToSave, matrixToSave, Imgproc.COLOR_YUV2BGR);
+		ImageSaver.encodeAndSave(matrixToSave, fileName);
+		Imgproc.cvtColor(matrixToSave, matrixToSave, Imgproc.COLOR_BGR2YUV);
 	}
 }

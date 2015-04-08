@@ -7,7 +7,8 @@ import org.opencv.core.Mat;
 
 import com.neildg.cameraenhance.images.ImageDataStorage;
 import com.neildg.cameraenhance.processing.IImageProcessor;
-import com.neildg.cameraenhance.processing.operators.GaussianBlur;
+import com.neildg.cameraenhance.processing.operators.Blur;
+import com.neildg.cameraenhance.processing.operators.Blur.BlurType;
 import com.neildg.cameraenhance.processing.operators.WienerFilter;
 import com.neildg.cameraenhance.processing.operators.WienerFilter_2;
 import com.neildg.cameraenhance.processing.saving.ImageSaver;
@@ -24,7 +25,7 @@ public class WienerFilterTest implements IImageProcessor {
 	private Mat originalMatrix;
 	private Mat processingMatrix;
 	
-	private GaussianBlur blurOperator;
+	private Blur blurOperator;
 	//private WienerFilter wienerFilter;
 	private WienerFilter_2 wienerFilter;
 	
@@ -37,8 +38,8 @@ public class WienerFilterTest implements IImageProcessor {
 		this.processingMatrix = new Mat();
 		
 		//create a blur sample
-		this.blurOperator = new GaussianBlur(this.originalMatrix, this.processingMatrix);
-		this.blurOperator.setParameters(13, 13, 1.5, 1.5);
+		this.blurOperator = new Blur(this.originalMatrix, this.processingMatrix);
+		this.blurOperator.setParameters(13, 13, 1.5, 1.5, BlurType.GAUSSIAN);
 		this.processingMatrix = this.blurOperator.perform();
 		
 		ImageSaver.encodeAndSave(this.processingMatrix, "blurred");

@@ -1,6 +1,11 @@
 package com.neildg.cameraenhance.processing.iterativeupsample;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import org.opencv.core.Core;
 import org.opencv.core.Mat;
+import org.opencv.imgproc.Imgproc;
 
 import android.util.Log;
 
@@ -8,10 +13,11 @@ import com.neildg.cameraenhance.config.values.DefaultConfigValues;
 import com.neildg.cameraenhance.images.ImageDataStorage;
 import com.neildg.cameraenhance.processing.IImageProcessor;
 import com.neildg.cameraenhance.processing.operators.Denoise;
-import com.neildg.cameraenhance.processing.operators.GaussianBlur;
+import com.neildg.cameraenhance.processing.operators.Blur;
 import com.neildg.cameraenhance.processing.operators.IncrementalPixelSubstitution;
 import com.neildg.cameraenhance.processing.operators.IncrementalUpSample;
 import com.neildg.cameraenhance.processing.operators.UnsharpenMask;
+import com.neildg.cameraenhance.processing.operators.Blur.BlurType;
 import com.neildg.cameraenhance.processing.saving.ImageSaver;
 import com.neildg.cameraenhance.ui.ProgressDialogHandler;
 
@@ -23,21 +29,31 @@ import com.neildg.cameraenhance.ui.ProgressDialogHandler;
 public class IterativeUpSample implements IImageProcessor {
 	private final static String TAG = "CameraEnhance_PixelSubstitutionTest";
 	
-	private final static float UP_SAMPLE_CONSTANT = 0.25f;
+	public final static int Y_CHANNEL = 0;
+	public final static int U_CHANNEL = 1;
+	public final static int V_CHANNEL = 2;
+	
+	private final static float UP_SAMPLE_CONSTANT = 0.5f;
 	
 	private Mat originalMatrix;
-	private Mat processingMatrix;
+	private Mat yuvMatrix;
+	private ArrayList<Mat> splittedMatrix;
 	
 	private IncrementalUpSample upSampler;
 	private UnsharpenMask unSharpMask;
-	private Denoise denoise;
+	private Blur blur;
 	private IncrementalPixelSubstitution pixelSub;
 	
 	@Override
 	public void Preprocess() {
 		this.originalMatrix = ImageDataStorage.getInstance().loadMatFormOfOriginalImage();
-		this.processingMatrix = new Mat();
-		this.originalMatrix.copyTo(this.processingMatrix);
+		
+		//convert to YUV color space
+		this.yuvMatrix = new Mat();
+		Imgproc.cvtColor(this.originalMatrix, this.yuvMatrix, Imgproc.COLOR_BGR2YUV);
+		
+		this.splittedMatrix = new ArrayList<Mat>();
+		Core.split(this.yuvMatrix, this.splittedMatrix);
 	}
 
 	@Override
@@ -48,28 +64,31 @@ public class IterativeUpSample implements IImageProcessor {
 		Log.d(TAG, "Num iterations: " +numIterations);
 		
 		Mat beforeUpSampleMat = new Mat();
-		this.originalMatrix.copyTo(beforeUpSampleMat);
+		this.splittedMatrix.get(Y_CHANNEL).copyTo(beforeUpSampleMat);
 		
 		for(int i = 0; i < numIterations; i++) {
-			ProgressDialogHandler.getInstance().showDialog("Pixel Substitution Test", "Processing. Iteration: " +i);
-			this.upSampler = new IncrementalUpSample(this.originalMatrix, this.processingMatrix, upSampleFactor);
-			this.processingMatrix = this.upSampler.perform();
+			ProgressDialogHandler.getInstance().showDialog("Pixel Substitution Test", "Processing. Iteration: " +i+ " of " +(numIterations-1));
+			this.upSampler = new IncrementalUpSample(this.originalMatrix, this.yuvMatrix, upSampleFactor);
+			this.yuvMatrix = this.upSampler.perform();
 			
-			ImageSaver.encodeAndSave(this.processingMatrix, "upsample_"+i);
+			ImageSaver.encodeAndSaveAsRGB(this.yuvMatrix, "upsample_"+i);
+			
+			Core.split(this.yuvMatrix, this.splittedMatrix);
 			
 			Mat noPixelSubMat = new Mat();
-			this.processingMatrix.copyTo(noPixelSubMat);
+			this.splittedMatrix.get(Y_CHANNEL).copyTo(noPixelSubMat);
 			
-			this.pixelSub = new IncrementalPixelSubstitution(beforeUpSampleMat, this.processingMatrix);
-			this.processingMatrix = this.pixelSub.perform();
+			this.pixelSub = new IncrementalPixelSubstitution(beforeUpSampleMat, this.splittedMatrix.get(Y_CHANNEL));
+			this.pixelSub.perform();
 			
-			ImageSaver.encodeAndSave(this.processingMatrix, "pixelsub_"+i);
+			ImageSaver.encodeAndSave(this.splittedMatrix.get(Y_CHANNEL), "pixelsub_"+i);
 			
+			this.unSharpMask = new UnsharpenMask(this.splittedMatrix.get(Y_CHANNEL), noPixelSubMat);
+			this.unSharpMask.perform();
 			
-			this.unSharpMask = new UnsharpenMask(this.processingMatrix, noPixelSubMat);
-			this.processingMatrix = this.unSharpMask.perform();
-			this.processingMatrix.copyTo(beforeUpSampleMat);
-			//noPixelSubMat.release(); noPixelSubMat = null;
+			this.splittedMatrix.get(Y_CHANNEL).copyTo(beforeUpSampleMat);
+			
+			Core.merge(this.splittedMatrix, this.yuvMatrix);
 			
 			upSampleFactor += UP_SAMPLE_CONSTANT;
 			ProgressDialogHandler.getInstance().hideDialog();
@@ -79,11 +98,11 @@ public class IterativeUpSample implements IImageProcessor {
 
 	@Override
 	public void PostProcess() {
-
-		ImageSaver.encodeAndSaveAsProcessed(this.processingMatrix);
+		Imgproc.cvtColor(this.yuvMatrix, this.yuvMatrix, Imgproc.COLOR_YUV2BGR);
+		ImageSaver.encodeAndSaveAsProcessed(this.yuvMatrix);
 		
 		this.originalMatrix.release(); this.originalMatrix = null;
-		this.processingMatrix.release(); this.processingMatrix = null;
+		this.yuvMatrix.release(); this.yuvMatrix = null;
 		
 		this.pixelSub.cleanup(); this.pixelSub = null;
 		this.unSharpMask.cleanup(); this.unSharpMask = null;
