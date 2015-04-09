@@ -76,14 +76,14 @@ public class IterativeUpSample implements IImageProcessor {
 			ImageSaver.encodeAndSaveAsRGB(this.yuvMatrix, "upsample_"+i);
 			
 			//temporarily converty the yuv matrix to RGB for laplace sharpening
-			Mat forLaplaceMat = new Mat(this.yuvMatrix.size(), this.yuvMatrix.type());
+			/*Mat forLaplaceMat = new Mat(this.yuvMatrix.size(), this.yuvMatrix.type());
 			Imgproc.cvtColor(this.yuvMatrix, forLaplaceMat, Imgproc.COLOR_YUV2BGR);
 			
 			this.laplaceSharpener = new LaplaceSharpening(forLaplaceMat, forLaplaceMat);
 			this.laplaceSharpener.perform();
 			ImageSaver.encodeAndSave(forLaplaceMat, "sharpened_laplace");
 			
-			Imgproc.cvtColor(forLaplaceMat, this.yuvMatrix, Imgproc.COLOR_BGR2YUV); 
+			Imgproc.cvtColor(forLaplaceMat, this.yuvMatrix, Imgproc.COLOR_BGR2YUV);*/ 
 			
 			Core.split(this.yuvMatrix, this.splittedMatrix);
 			
@@ -102,6 +102,15 @@ public class IterativeUpSample implements IImageProcessor {
 
 	@Override
 	public void PostProcess() {
+		Mat forLaplaceMat = new Mat(this.yuvMatrix.size(), this.yuvMatrix.type());
+		Imgproc.cvtColor(this.yuvMatrix, forLaplaceMat, Imgproc.COLOR_YUV2BGR);
+		
+		this.laplaceSharpener = new LaplaceSharpening(forLaplaceMat, forLaplaceMat);
+		this.laplaceSharpener.perform();
+		ImageSaver.encodeAndSave(forLaplaceMat, "sharpened_laplace");
+		
+		//Imgproc.cvtColor(forLaplaceMat, this.yuvMatrix, Imgproc.COLOR_BGR2YUV);
+		
 		Imgproc.cvtColor(this.yuvMatrix, this.yuvMatrix, Imgproc.COLOR_YUV2BGR);
 		
 		ImageSaver.encodeAndSaveAsProcessed(this.yuvMatrix);

@@ -4,6 +4,7 @@
 package com.neildg.cameraenhance.processing;
 
 import com.neildg.cameraenhance.camera.CameraManager;
+import com.neildg.cameraenhance.images.ImageDataStorage;
 import com.neildg.cameraenhance.processing.fastupsample.FastSampleProcessor;
 import com.neildg.cameraenhance.processing.fastupsample.UpSampleDenoising;
 import com.neildg.cameraenhance.processing.iterativeupsample.IterativeUpSample;
@@ -91,6 +92,8 @@ public class ProcessorDispatcher implements NotificationListener {
 		this.processingOnGoing = false;
 		CameraManager.getInstance().requestCamera();
 		CameraManager.getInstance().refreshCameraPreview();
+		
+		ImageDataStorage.getInstance().releaseAll();
 	}
 	
 	@Override
