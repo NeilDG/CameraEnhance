@@ -13,30 +13,43 @@ import org.opencv.imgproc.Imgproc;
  * @author NeilDG
  *
  */
-public class GaussianBlur extends BaseOperator {
+public class Blur extends BaseOperator {
 	private final static String TAG = "CameraEnhance_GaussianBlur";
+	
+	public enum BlurType {
+		GAUSSIAN,
+		MEDIAN
+	}
 	
 	private Size kernelSize;
 	private double sigmaX = 0.0;
 	private double sigmaY = 0.0;
+	private BlurType blurType = BlurType.GAUSSIAN;
 	
-	public GaussianBlur(Mat inputMatrix, Mat outputMatrix) {
+	public Blur(Mat inputMatrix, Mat outputMatrix) {
 		//this.inputMatrix = new Mat();
 		//inputMatrix.copyTo(this.inputMatrix);
 		this.inputMatrix = inputMatrix;
 		this.outputMatrix = outputMatrix;
 	}
 	
-	public void setParameters(int kernelWidth, int kernelHeight, double sigmaX, double sigmaY) {
+	public void setParameters(int kernelWidth, int kernelHeight, double sigmaX, double sigmaY, BlurType blurType) {
 		this.kernelSize = new Size(kernelWidth, kernelHeight);
 		this.sigmaX = sigmaX;
 		this.sigmaY = sigmaY;
+		this.blurType = blurType;
 	}
 
 	@Override
 	public Mat perform() {
-		//Imgproc.GaussianBlur(this.inputMatrix, this.outputMatrix, this.kernelSize, this.sigmaX, this.sigmaY);
-		Imgproc.medianBlur(this.inputMatrix, this.outputMatrix, (int) this.kernelSize.width);
+		if(this.blurType == BlurType.GAUSSIAN) {
+			Imgproc.GaussianBlur(this.inputMatrix, this.outputMatrix, this.kernelSize, this.sigmaX, this.sigmaY);
+		}
+		else {
+			this.outputMatrix.convertTo(this.outputMatrix, CvType.CV_8UC1);
+			Imgproc.medianBlur(this.inputMatrix, this.outputMatrix, (int) this.kernelSize.width);
+		}
+		
 		return this.outputMatrix;
 	}
 	

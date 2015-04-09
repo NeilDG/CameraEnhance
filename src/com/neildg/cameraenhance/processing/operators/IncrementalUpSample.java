@@ -13,16 +13,22 @@ import org.opencv.imgproc.Imgproc;
 public class IncrementalUpSample extends BaseOperator {
 	private final static String TAG = "CameraEnhance_IncrementalUpSample";
 	
-	private int upSampleFactor = 0;
+	private float upSampleFactor = 0;
 	
 	private int newWidth = 0;
 	private int newHeight = 0;
 	
-	public IncrementalUpSample(Mat originalMatrix, Mat inputMatrix, int upSampleFactor) {
+	/**
+	 * 
+	 * @param originalMatrix - the matrix of the original image
+	 * @param inputMatrix - the input matrix to be resized.
+	 * @param upSampleFactor - the upsample factor
+	 */
+	public IncrementalUpSample(Mat originalMatrix, Mat inputMatrix, float upSampleFactor) {
 		this.inputMatrix = inputMatrix;
 		this.upSampleFactor = upSampleFactor;
-		this.newHeight = originalMatrix.height() * this.upSampleFactor;
-		this.newWidth = originalMatrix.width() * this.upSampleFactor;
+		this.newHeight = Math.round(originalMatrix.height() * this.upSampleFactor);
+		this.newWidth = Math.round(originalMatrix.width() * this.upSampleFactor);
 	}
 	
 	@Override

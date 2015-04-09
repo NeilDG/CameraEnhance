@@ -26,7 +26,7 @@ public class UnsharpenMask extends BaseOperator {
 	
 	@Override
 	public Mat perform() {
-		Core.addWeighted(this.inputMatrix, 1.5, this.outputMatrix, -0.5, 0, this.outputMatrix);
+		Core.addWeighted(this.inputMatrix, 1.75, this.outputMatrix, -0.5, 0, this.outputMatrix);
 		
 		return this.outputMatrix;
 	}

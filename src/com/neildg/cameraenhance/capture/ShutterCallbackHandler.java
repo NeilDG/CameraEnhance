@@ -37,7 +37,7 @@ public class ShutterCallbackHandler extends Thread implements PreviewCallback {
 	public void run() {
 		
 		//TODO: uncomment to use burst mode
-		/*ProgressDialogHandler.getInstance().showDialog("Taking pictures", "Do not move the device!");
+		ProgressDialogHandler.getInstance().showDialog("Taking pictures", "Do not move the device!");
 		
 		Camera camera = CameraManager.getInstance().requestCamera();
 		CameraManager.getInstance().setupCameraForShutter();
@@ -58,7 +58,7 @@ public class ShutterCallbackHandler extends Thread implements PreviewCallback {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-		}*/
+		}
 		
 		ImageWriter.getInstance().startWriting(); //start writing images
 		ImageSequencesHolder.getInstance().release();

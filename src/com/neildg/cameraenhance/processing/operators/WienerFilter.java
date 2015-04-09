@@ -25,25 +25,29 @@ public class WienerFilter extends BaseOperator {
 	private Mat kernel;
 	private int depth;
 	
+	private int radius = 0;
+	
 	public WienerFilter(Mat inputMatrix, Mat outputMatrix) {
 		this.inputMatrix = inputMatrix;
 		this.outputMatrix = outputMatrix;	
-		
-		this.inputMatrix.convertTo(this.inputMatrix, CvType.CV_32F);
-		this.outputMatrix.convertTo(this.outputMatrix, CvType.CV_32F);
+
 		this.depth = this.inputMatrix.depth();
 	}
 	
-	public void setParameters(int kernelWidth, int kernelHeight) {
-		this.kernel = new Mat(kernelWidth, kernelHeight, this.inputMatrix.type(), Scalar.all( 1.0 / (double) (kernelWidth * kernelHeight)));
+	public void setParameters(int radius) {
+		this.radius = radius;
+	}
+	
+	private void createDefocusKernel() {
+		this.kernel = Mat.zeros(65, 65, CvType.CV_8U); //65 is the default size of the defocus kernel
+		Core.circle(this.kernel, new Point(65,65), this.radius, new Scalar(255,255,255,255), -1, Core.LINE_AA, 1);
 	}
 
 
 	@Override
 	public Mat perform() {
 		if(this.kernel == null) {
-			Log.e(TAG, "Kernel not set! You must call setParameters()!");
-			return null;
+			this.createDefocusKernel();
 		}
 		
 		int nRows = this.kernel.height();

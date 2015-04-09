@@ -7,7 +7,8 @@ import android.util.Log;
 import com.neildg.cameraenhance.config.values.DefaultConfigValues;
 import com.neildg.cameraenhance.images.ImageDataStorage;
 import com.neildg.cameraenhance.processing.IImageProcessor;
-import com.neildg.cameraenhance.processing.operators.GaussianBlur;
+import com.neildg.cameraenhance.processing.operators.Blur;
+import com.neildg.cameraenhance.processing.operators.Blur.BlurType;
 import com.neildg.cameraenhance.processing.operators.PixelSubstitution;
 import com.neildg.cameraenhance.processing.operators.UnsharpenMask;
 import com.neildg.cameraenhance.processing.operators.UpsampleInterpolate;
@@ -27,7 +28,7 @@ public class FastSampleProcessor implements IImageProcessor {
 	private final static int MAX_ITERATIONS = 4;
 	
 	private UpsampleInterpolate upSampler;
-	private GaussianBlur blurOperator;
+	private Blur blurOperator;
 	private UnsharpenMask unsharpMask;
 	//private WienerFilter wienerFilter;
 	private PixelSubstitution pixelSubstitution;
@@ -58,8 +59,8 @@ public class FastSampleProcessor implements IImageProcessor {
 			ProgressDialogHandler.getInstance().showDialog("Refining", "Iteration count: " +i);
 			
 			//blur image (convolution)
-			this.blurOperator = new GaussianBlur(this.processingMatrix, this.processingMatrix);
-			this.blurOperator.setParameters(13, 13, 1.5, 1.5);
+			this.blurOperator = new Blur(this.processingMatrix, this.processingMatrix);
+			this.blurOperator.setParameters(13, 13, 1.5, 1.5, BlurType.MEDIAN);
 			this.processingMatrix = this.blurOperator.perform();
 			
 			//save for checking
@@ -81,8 +82,8 @@ public class FastSampleProcessor implements IImageProcessor {
 			}
 			
 			//blur again
-			this.blurOperator = new GaussianBlur(this.processingMatrix, this.processingMatrix);
-			this.blurOperator.setParameters(13, 13, 1.5, 1.5);
+			this.blurOperator = new Blur(this.processingMatrix, this.processingMatrix);
+			this.blurOperator.setParameters(13, 13, 1.5, 1.5, BlurType.MEDIAN);
 			this.processingMatrix = this.blurOperator.perform();
 			
 			//save for checking
@@ -109,8 +110,8 @@ public class FastSampleProcessor implements IImageProcessor {
 		Mat unblurredMatrix = new Mat();
 		this.processingMatrix.copyTo(unblurredMatrix);
 		
-		this.blurOperator = new GaussianBlur(this.processingMatrix, this.processingMatrix);
-		this.blurOperator.setParameters(13, 13, 1.5, 1.5);
+		this.blurOperator = new Blur(this.processingMatrix, this.processingMatrix);
+		this.blurOperator.setParameters(13, 13, 1.5, 1.5, BlurType.MEDIAN);
 		this.processingMatrix = this.blurOperator.perform();
 		
 		//save for checking
