@@ -7,13 +7,18 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 
-import com.neildg.cameraenhance.capture.ImageDataStorage;
+import com.neildg.cameraenhance.camera.CameraManager;
+import com.neildg.cameraenhance.capture.ImageSequencesHolder;
 import com.neildg.cameraenhance.utils.notifications.NotificationCenter;
 import com.neildg.cameraenhance.utils.notifications.NotificationListener;
 import com.neildg.cameraenhance.utils.notifications.Notifications;
 import com.neildg.cameraenhance.utils.notifications.Parameters;
 
 import android.content.Context;
+import android.graphics.Rect;
+import android.graphics.YuvImage;
+import android.hardware.Camera;
+import android.hardware.Camera.Size;
 import android.os.Environment;
 import android.util.Log;
 
@@ -44,24 +49,25 @@ public class ImageWriter implements NotificationListener {
 	
 	private ImageWriter(Context context) {
 		this.context = context;
+		
 	}
 	
 	public static void initialize(Context context) {
-		sharedInstance = new ImageWriter(context);
-		NotificationCenter.getInstance().addObserver(Notifications.ON_POST_PROCESS_FINISHED, sharedInstance);
 		
-		//also initialize image reader
-		ImageReader.initialize(context);
+		if(sharedInstance == null) {
+			sharedInstance = new ImageWriter(context);
+			
+			//also initialize image reader
+			ImageReader.initialize(context);
+		}
 	}
 	
 	public static void destroy() {
-		NotificationCenter.getInstance().removeObserver(Notifications.ON_POST_PROCESS_FINISHED, sharedInstance);
-		
 		//also destroy image reader
 		ImageReader.destroy();
 	}
 	
-	private void createNewAlbum() {
+	private void identifyDir() {
 		//identify directory index first
 		while(ImageReader.getInstance().isAlbumDirExisting(this.startingAlbum)) {
 			this.startingAlbum++;
@@ -69,6 +75,10 @@ public class ImageWriter implements NotificationListener {
 		
 		//create path
 		this.proposedPath = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES) + ALBUM_NAME_PREFIX + this.startingAlbum;
+	}
+	
+	private void createNewAlbum() {
+		
 		File filePath = new File(this.proposedPath);
 		filePath.mkdirs();
 		
@@ -79,16 +89,17 @@ public class ImageWriter implements NotificationListener {
 	 * Starts writing to the specified directory
 	 */
 	public void startWriting() {
+		this.identifyDir();
 		this.createNewAlbum();
 		
 		//save original image
 		try {
-			File originalImageFile = new File(this.proposedPath, ORIGINAL_IMAGE_NAME);
-			
-			FileOutputStream fos = new FileOutputStream(originalImageFile);
-			byte[] imageData = ImageDataStorage.getInstance().getOriginalImageData();
+			byte[] imageData = ImageSequencesHolder.getInstance().getOriginalImageData();
 			
 			if(imageData != null) {
+				File originalImageFile = new File(this.proposedPath, ORIGINAL_IMAGE_NAME);
+				FileOutputStream fos = new FileOutputStream(originalImageFile);
+				
 				fos.write(imageData);
 				fos.close();
 			}
@@ -98,14 +109,41 @@ public class ImageWriter implements NotificationListener {
 			Log.e(TAG, "Error writing original image: " +e.getMessage());
 		}
 		
+		//save image sequences
+		try {
+
+			Camera.Parameters parameters = CameraManager.getInstance().requestCamera().getParameters();
+			Size size = parameters.getPreviewSize(); 
+			
+			for(int i = 0; i < ImageSequencesHolder.getInstance().getImageToProcessSize(); i++) {
+				byte[] imageData = ImageSequencesHolder.getInstance().getImageDataAt(i);
+				
+				if(imageData != null) {
+			       
+			        YuvImage image = new YuvImage(imageData, parameters.getPreviewFormat(), 
+			                size.width, size.height, null); 
+					File originalImageFile = new File(this.proposedPath, (i) + ".jpg");
+					FileOutputStream fos = new FileOutputStream(originalImageFile);
+					
+					image.compressToJpeg( 
+			                new Rect(0, 0, image.getWidth(), image.getHeight()), 90, 
+			                fos); 
+					fos.close();
+				}
+			}
+			
+		}
+		catch(IOException e) {
+			Log.e(TAG, "Error writing original image: " +e.getMessage());
+		}
+	}
+	
+	public void saveProcessedImage(byte[] imageData) {
 		//save processed image
 		try {
-			File processedImageFile = new File(this.proposedPath, PROCESSED_IMAGE_NAME);
-			
-			FileOutputStream fos = new FileOutputStream(processedImageFile);
-			byte[] imageData = ImageDataStorage.getInstance().getProcessedImageData();
-			
 			if(imageData != null) {
+				File processedImageFile = new File(this.proposedPath, PROCESSED_IMAGE_NAME);
+				FileOutputStream fos = new FileOutputStream(processedImageFile);
 				fos.write(imageData);
 				fos.close();
 			}
@@ -114,13 +152,33 @@ public class ImageWriter implements NotificationListener {
 		catch(IOException e) {
 			Log.e(TAG, "Error writing original image: " +e.getMessage());
 		}
-		
+	}
+	
+	/**
+	 * Saves a given image for viewing or later reuse in processing.
+	 * Images saved are automatically appended with a JPEG extension.
+	 * @param imageData
+	 */
+	public void saveSpecifiedImage(byte[] imageData, String fileName) {
+		try {
+			if(imageData != null) {
+				File processedImageFile = new File(this.proposedPath, fileName + ".jpg");
+				FileOutputStream fos = new FileOutputStream(processedImageFile);
+				fos.write(imageData);
+				fos.close();
+			}
+		}
+		catch(IOException e) {
+			Log.e(TAG, "Error writing image: " +e.getMessage());
+		}
 	}
 
 	@Override
 	public void onNotify(String notificationString, Parameters params) {
-		if(notificationString == Notifications.ON_POST_PROCESS_FINISHED) {
-			this.startWriting();
-		}
+		
+	}
+	
+	public String getFilePath() {
+		return this.proposedPath;
 	}
 }

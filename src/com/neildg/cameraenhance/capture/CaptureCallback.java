@@ -10,6 +10,7 @@ import com.neildg.cameraenhance.utils.notifications.Parameters;
 
 import android.hardware.Camera;
 import android.hardware.Camera.PictureCallback;
+import android.hardware.Camera.PreviewCallback;
 import android.util.Log;
 
 /**
@@ -21,6 +22,7 @@ public class CaptureCallback implements PictureCallback {
 	private final static String TAG = "CameraEnhance_CaptureCallback";
 	
 	public final static String CAPTURED_IMAGE_DATA_KEY = "CAPTURED_IMAGE_DATA_KEY";
+	
 	@Override
 	public void onPictureTaken(byte[] data, Camera camera) {
 		Log.d(TAG, "Picture taken!");
@@ -28,13 +30,16 @@ public class CaptureCallback implements PictureCallback {
 		Parameters params = new Parameters();
 		params.putExtra(CAPTURED_IMAGE_DATA_KEY, data);
 		
-		ImageDataStorage.getInstance().setOriginalImageData(data);
+		ImageSequencesHolder.getInstance().setOriginalImageData(data);
 		NotificationCenter.getInstance().postNotification(Notifications.ON_CREATE_THUMBNAIL, params);
 		
 		//update camera source to refresh preview
 		CameraManager.getInstance().refreshCameraPreview();
 		
-		NotificationCenter.getInstance().postNotification(Notifications.ON_IMAGE_PROCESSING_STARTED);
+		ShutterCallbackHandler shutterHandler = new ShutterCallbackHandler();
+		shutterHandler.start();
 	}
+	
+	
 
 }

@@ -12,7 +12,7 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 
 import com.neildg.cameraenhance.R;
-import com.neildg.cameraenhance.capture.ImageDataStorage;
+import com.neildg.cameraenhance.capture.ImageSequencesHolder;
 import com.neildg.cameraenhance.photoview.PhotoViewAttacher;
 import com.neildg.cameraenhance.processing.TestImageProcessor;
 import com.neildg.cameraenhance.processing.workers.ImageWorker;
@@ -53,7 +53,7 @@ public class ImagePreviewFragment extends Fragment {
 	private void initializeImageView() {
 		this.imageView = (ImageView) this.parentView.findViewById(R.id.processed_image_view);
 		
-		Bitmap bitmap = BitmapDecoder.decodeActualBitmapFromByteArray(ImageDataStorage.getInstance().getOriginalImageData());
+		Bitmap bitmap = BitmapDecoder.decodeActualBitmapFromByteArray(ImageSequencesHolder.getInstance().getOriginalImageData());
 		this.imageView.setImageBitmap(bitmap);
 		
 		this.photoAttacher = new PhotoViewAttacher(this.imageView);
@@ -71,20 +71,6 @@ public class ImagePreviewFragment extends Fragment {
 		imageWorker.start();
 	}
 	
-	private void displayProcessedImage() {
-		
-		this.getActivity().runOnUiThread(new Runnable() {
-			
-			@Override
-			public void run() {
-				Bitmap bitmap = BitmapDecoder.decodeActualBitmapFromByteArray(ImageDataStorage.getInstance().getProcessedImageData());
-				
-				ImagePreviewFragment.this.imageView.setImageBitmap(bitmap);
-				ImagePreviewFragment.this.photoAttacher.update();
-			}
-		});
-
-	}
 	
 	private void showProgressDialog(final String title, final String message) {
 		this.getActivity().runOnUiThread(new Runnable() {
