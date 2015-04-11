@@ -42,6 +42,7 @@ public class LaplaceSharpening extends BaseOperator {
 		
 		Imgproc.Laplacian(greyScaleMat, this.outputMatrix, CvType.CV_16S, 3, 1, 0);
 		Core.convertScaleAbs(this.outputMatrix, this.outputMatrix);
+		ImageSaver.encodeAndSave(this.outputMatrix, "laplace_filter");
 		
 		Imgproc.cvtColor(this.outputMatrix, this.outputMatrix, Imgproc.COLOR_GRAY2BGR);
 		Core.addWeighted(this.outputMatrix, -0.25, rgbMat, 1.0, 0, this.outputMatrix);
