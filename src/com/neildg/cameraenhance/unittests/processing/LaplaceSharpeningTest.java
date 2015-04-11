@@ -5,6 +5,7 @@ import org.opencv.core.Mat;
 import com.neildg.cameraenhance.images.ImageDataStorage;
 import com.neildg.cameraenhance.processing.IImageProcessor;
 import com.neildg.cameraenhance.processing.operators.LaplaceSharpening;
+import com.neildg.cameraenhance.processing.saving.ImageSaver;
 import com.neildg.cameraenhance.ui.ProgressDialogHandler;
 
 /**
@@ -31,6 +32,8 @@ public class LaplaceSharpeningTest implements IImageProcessor {
 	public void Process() {
 		this.laplaceSharp = new LaplaceSharpening(this.processingMatrix, this.processingMatrix);
 		this.processingMatrix = this.laplaceSharp.perform();
+		
+		ImageSaver.encodeAndSave(this.processingMatrix, "sharpened_laplace");
 	}
 
 	@Override
