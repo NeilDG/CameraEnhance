@@ -34,7 +34,7 @@ public class IterativeUpSample implements IImageProcessor {
 	public final static int U_CHANNEL = 1;
 	public final static int V_CHANNEL = 2;
 	
-	private final static float UP_SAMPLE_CONSTANT = 0.5f;
+	private final static float UP_SAMPLE_CONSTANT = 0.25f;
 	
 	private Mat originalMatrix;
 	private Mat yuvMatrix;
@@ -108,8 +108,7 @@ public class IterativeUpSample implements IImageProcessor {
 		this.laplaceSharpener = new LaplaceSharpening(forLaplaceMat, forLaplaceMat);
 		this.laplaceSharpener.perform();
 		ImageSaver.encodeAndSave(forLaplaceMat, "sharpened_laplace");
-		
-		//Imgproc.cvtColor(forLaplaceMat, this.yuvMatrix, Imgproc.COLOR_BGR2YUV);
+		Imgproc.cvtColor(forLaplaceMat, this.yuvMatrix, Imgproc.COLOR_BGR2YUV);
 		
 		Imgproc.cvtColor(this.yuvMatrix, this.yuvMatrix, Imgproc.COLOR_YUV2BGR);
 		

@@ -260,7 +260,7 @@ public class CameraManager {
 		 Camera.Size closestSize = this.getBestPictureSizedBasedOnArea(baseConfig.getCameraWidth(), baseConfig.getCameraHeight());
 		 Log.d(TAG, "Setting picture size: " + closestSize.width + " X " +closestSize.height);
 		 
-		 parameters.setSceneMode(Camera.Parameters.SCENE_MODE_HDR);
+		 parameters.setSceneMode(Camera.Parameters.SCENE_MODE_STEADYPHOTO);
 		 parameters.setPictureSize(closestSize.width, closestSize.height);
 		 this.deviceCamera.setParameters(parameters);
 	}

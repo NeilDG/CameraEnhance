@@ -45,6 +45,7 @@ public class LaplaceSharpening extends BaseOperator {
 		
 		Imgproc.cvtColor(this.outputMatrix, this.outputMatrix, Imgproc.COLOR_GRAY2BGR);
 		Core.addWeighted(this.outputMatrix, -0.25, rgbMat, 1.0, 0, this.outputMatrix);
+		//Core.add(this.outputMatrix, rgbMat, this.outputMatrix);
 		
 		greyScaleMat.release(); greyScaleMat = null;
 		rgbMat.release(); rgbMat = null;
