@@ -16,8 +16,8 @@ public class MultipleImageConfig extends BaseConfig {
 		this.imageLimit = 10;
 		this.shutterDelay = 100;
 		
-		//this.defaultWidth = 300;
-		//this.defaultHeight = 300;
+		this.defaultWidth = DefaultConfigValues.DEFAULT_CAMERA_WIDTH;
+		this.defaultHeight = DefaultConfigValues.DEFAULT_CAMERA_HEIGHT;
 	}
 	
 }
