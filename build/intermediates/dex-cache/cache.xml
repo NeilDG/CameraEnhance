@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<items version="2" >
+
+    <item
+        jar="C:\Users\user\AppData\Local\Android\sdk\extras\android\m2repository\com\android\support\support-v4\19.1.0\support-v4-19.1.0.jar"
+        jumboMode="false"
+        revision="21.1.2"
+        sha1="85f201b380937e61a9dce6ca90ccf6872abbfb67">
+        <dex dex="D:\Android Development\MSCSWorkfiles\mscs\AndroidTools\CameraEnhance\cameraEnhance\build\intermediates\pre-dexed\debug\support-v4-19.1.0_b3496f51f7a24758f401e30b864af34cab97267c.jar" />
+    </item>
+    <item
+        jar="D:\Android Development\MSCSWorkfiles\mscs\AndroidTools\CameraEnhance\cameraEnhance\build\intermediates\exploded-aar\CameraEnhance\openCVLibrary2411\unspecified\jars\classes.jar"
+        jumboMode="false"
+        revision="21.1.2"
+        sha1="d49f3e093c06dfe24f52b2f532e40ab7837b5b6f">
+        <dex dex="D:\Android Development\MSCSWorkfiles\mscs\AndroidTools\CameraEnhance\cameraEnhance\build\intermediates\pre-dexed\debug\CameraEnhance-openCVLibrary2411-unspecified_87543540b07f66eaaad4d223117109ab3568e614.jar" />
+    </item>
+
+</items>

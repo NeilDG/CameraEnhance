@@ -1,0 +1,22 @@
+[
+    {
+        "merged": "D:\\Android Development\\MSCSWorkfiles\\mscs\\AndroidTools\\CameraEnhance\\cameraEnhance\\build\\intermediates\\res\\merged\\debug\\layout\\activity_main.xml",
+        "source": "D:\\Android Development\\MSCSWorkfiles\\mscs\\AndroidTools\\CameraEnhance\\cameraEnhance\\src\\main\\res\\layout\\activity_main.xml"
+    },
+    {
+        "merged": "D:\\Android Development\\MSCSWorkfiles\\mscs\\AndroidTools\\CameraEnhance\\cameraEnhance\\build\\intermediates\\res\\merged\\debug\\layout\\fragment_processed_images.xml",
+        "source": "D:\\Android Development\\MSCSWorkfiles\\mscs\\AndroidTools\\CameraEnhance\\cameraEnhance\\src\\main\\res\\layout\\fragment_processed_images.xml"
+    },
+    {
+        "merged": "D:\\Android Development\\MSCSWorkfiles\\mscs\\AndroidTools\\CameraEnhance\\cameraEnhance\\build\\intermediates\\res\\merged\\debug\\layout\\activity_image_view.xml",
+        "source": "D:\\Android Development\\MSCSWorkfiles\\mscs\\AndroidTools\\CameraEnhance\\cameraEnhance\\src\\main\\res\\layout\\activity_image_view.xml"
+    },
+    {
+        "merged": "D:\\Android Development\\MSCSWorkfiles\\mscs\\AndroidTools\\CameraEnhance\\cameraEnhance\\build\\intermediates\\res\\merged\\debug\\layout\\fragment_tools.xml",
+        "source": "D:\\Android Development\\MSCSWorkfiles\\mscs\\AndroidTools\\CameraEnhance\\cameraEnhance\\src\\main\\res\\layout\\fragment_tools.xml"
+    },
+    {
+        "merged": "D:\\Android Development\\MSCSWorkfiles\\mscs\\AndroidTools\\CameraEnhance\\cameraEnhance\\build\\intermediates\\res\\merged\\debug\\layout\\fragment_image_preview.xml",
+        "source": "D:\\Android Development\\MSCSWorkfiles\\mscs\\AndroidTools\\CameraEnhance\\cameraEnhance\\src\\main\\res\\layout\\fragment_image_preview.xml"
+    }
+]
